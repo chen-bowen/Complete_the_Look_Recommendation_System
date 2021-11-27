@@ -1,0 +1,14 @@
+name: complete_the_look
+channels:
+  - defaults
+dependencies:
+  - numpy
+  - pyyaml
+  - matplotlib
+  - scipy
+  - future
+  - pip
+  - torch
+  - urllib3
+  - pillow
+  - tqdm
