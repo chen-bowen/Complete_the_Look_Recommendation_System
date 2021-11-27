@@ -8,7 +8,7 @@ dependencies:
   - scipy
   - future
   - pip
-  - torch
+  - pytorch
   - urllib3
   - pillow
   - tqdm
