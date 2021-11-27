@@ -10,5 +10,7 @@ dependencies:
   - pip
   - torch
   - urllib3
+  - pandas
   - pillow
   - tqdm
+  - torchvision

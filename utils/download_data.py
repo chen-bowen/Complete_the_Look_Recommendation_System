@@ -1,6 +1,7 @@
 import concurrent.futures
 import json
 import urllib.request
+from os import mkdir, path
 
 import tqdm
 
@@ -14,6 +15,10 @@ def convert_to_url(signature):
 def download_and_save_image(res, image_category, image_type):
     """ Get image from signature, image category and image type """
     img_url = convert_to_url(res[image_type])
+
+    if not path.exists(f"data/{image_category}/{image_type}"):
+        mkdir(f"data/{image_category}/{image_type}")
+
     try:
         urllib.request.urlretrieve(
             img_url, f"data/{image_category}/{image_type}/{res[image_type]}.jpg",
