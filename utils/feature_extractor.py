@@ -5,8 +5,9 @@ import torch.optim as optim
 from torchvision import models
 import make_data
 from make_data import create_dataloader
+import pickle
 
-
+IMAGE_TYPE = "product"
 def extractor():
     """
     Import data loader with the batches. Go through each batch and pass through ResNet. Features are extracted from 
@@ -33,7 +34,9 @@ def extractor():
         # print(round(batch_idx/len(data_loader)*100,2),"percent complete",end = '\r',flush=True)
         print(batch_idx+1, "batch(s) extracted")
     all_features = torch.stack(all_features)
-    # breakpoint()
+    breakpoint()
+    with open(f'{IMAGE_TYPE}_features.pickle', 'wb') as handle:
+        pickle.dump(all_features, handle, protocol=pickle.HIGHEST_PROTOCOL)
     return all_features
     
 if __name__ == "__main__":

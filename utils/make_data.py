@@ -8,6 +8,7 @@ import config as cfg
 BATCH_SIZE = cfg.batch_size
 FOLDER = "product"
 def create_dataloader():
+    print("Loading pickle file...")
     file = open(f'{FOLDER}_df.pickle', 'rb')
     X_train = pickle.load(file)
     file.close()
