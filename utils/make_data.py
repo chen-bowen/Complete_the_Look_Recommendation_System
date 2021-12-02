@@ -1,30 +1,26 @@
-import os
+import pickle
+from FashionDataset import FashionProductDataset
+from torchvision import transforms
+from torch.utils.data import DataLoader
+import math
+import config as cfg
 
-import matplotlib.pyplot as plt
-import pandas as pd
-import torch
-from torch.utils.data import Dataset
-from torchvision import datasets
-from torchvision.io import read_image
-from torchvision.transforms import ToTensor
+BATCH_SIZE = cfg.batch_size
+FOLDER = "product"
+def create_dataloader():
+    file = open(f'{FOLDER}_df.pickle', 'rb')
+    X_train = pickle.load(file)
+    file.close()
 
+    # file = open('FILENAME_Y_train', 'rb')
+    # Y_train = pickle.load(file)
+    # file.close()
 
-class FashionProductDataset(Dataset):
-    def __init__(self, annotations_file, img_dir, transform=None, target_transform=None):
-        self.img_labels = pd.read_csv(annotations_file)
-        self.img_dir = img_dir
-        self.transform = transform
-        self.target_transform = target_transform
+    print("Creating data loader...")
 
-    def __len__(self):
-        return len(self.img_labels)
+    product_dataset = FashionProductDataset(X_train, transform=transforms.Compose([transforms.ToTensor()]))
+    data_loader = DataLoader(product_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=0)
 
-    def __getitem__(self, idx):
-        img_path = os.path.join(self.img_dir, self.img_labels.iloc[idx, 0])
-        image = read_image(img_path)
-        label = self.img_labels.iloc[idx, 1]
-        if self.transform:
-            image = self.transform(image)
-        if self.target_transform:
-            label = self.target_transform(label)
-        return image, label
+    print("Data loader complete. Ready for use.")
+
+    return data_loader
