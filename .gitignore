@@ -1,6 +1,10 @@
 .DS_Store
 data/
 __pycache__
+<<<<<<< HEAD
 *.pickle
 .metals
 .vscode
+=======
+*.csv
+>>>>>>> c52c6df5af7c88ecc8f9a702375bf02e5f3e8967
