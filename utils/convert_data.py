@@ -15,7 +15,6 @@ WIDTH = 56
 FOLDER = "product" # or scene
 
 DATA_LIMIT = BATCHES * BATCH_SIZE
-x = 0
 
 def process_data(image_type):
     pickle_list = []
