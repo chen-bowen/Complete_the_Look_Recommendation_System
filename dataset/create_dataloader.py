@@ -37,7 +37,7 @@ def build_metadata_csv():
     images_df.to_csv(f"{cfg.DATASET_DIR}/dataset_metadata.csv")
 
 
-def dataloader(metadata_csv):
+def dataloader(metadata_csv=f"{cfg.DATASET_DIR}/dataset_metadata.csv"):
 
     print("Creating data loader...")
 
@@ -55,7 +55,6 @@ def dataloader(metadata_csv):
     dataset = ProductAndSceneDataset(
         cfg.RAW_DATA_FOLDER, metadata_csv, transform=transformations, subset="product"
     )
-    breakpoint()
     data_loader = DataLoader(dataset, batch_size=cfg.BATCH_SIZE, shuffle=True, num_workers=0)
 
     print("Data loader complete. Ready for use.")
@@ -66,4 +65,4 @@ def dataloader(metadata_csv):
 if __name__ == "__main__":
 
     build_metadata_csv()
-    dl = dataloader(metadata_csv=f"{cfg.DATASET_DIR}/dataset_metadata.csv")
+    dl = dataloader()
