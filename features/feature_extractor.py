@@ -5,12 +5,6 @@ import torchvision
 import tqdm
 from dataset.create_dataloader import dataloader
 from torchvision import models
-<<<<<<< HEAD:src/features/feature_extractor.py
-import make_data
-from make_data import create_dataloader
-import pickle
-=======
->>>>>>> 611992e4259243a85e2247c37eddb56a6596dbe5:features/feature_extractor.py
 
 IMAGE_TYPE = "product"
 def extractor():
