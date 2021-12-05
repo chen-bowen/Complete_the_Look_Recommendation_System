@@ -1,6 +1,8 @@
 import pathlib
 
-PACKAGE_ROOT = pathlib.Path(__file__).resolve().parent.parent
+import src
+
+PACKAGE_ROOT = pathlib.Path(src.__file__).resolve().parent
 
 BATCHES = 8
 BATCH_SIZE = 64

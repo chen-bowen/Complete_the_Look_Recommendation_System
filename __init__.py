@@ -1,7 +1,7 @@
 import logging
 
-from complete_the_look import dataset, features, utils
-from complete_the_look.config import config, logging_config
+from src import dataset, features, utils
+from src.config import config, logging_config
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

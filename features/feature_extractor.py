@@ -1,13 +1,16 @@
+import pickle
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torchvision
 import tqdm
-from dataset.create_dataloader import dataloader
+from src.dataset.create_dataloader import dataloader
 from torchvision import models
-import pickle
 
 IMAGE_TYPE = "product"
+
+
 def extractor():
     """
     Import data loader with the batches. Go through each batch and pass through ResNet. Features are extracted from
@@ -29,8 +32,8 @@ def extractor():
             batch_features = resnet(X)
             all_features.append(batch_features)
     all_features = torch.cat(all_features)
-    
-    with open(f'{IMAGE_TYPE}_features.pickle', 'wb') as handle:
+
+    with open(f"{IMAGE_TYPE}_features.pickle", "wb") as handle:
         pickle.dump(all_features, handle, protocol=pickle.HIGHEST_PROTOCOL)
     return all_features
 
