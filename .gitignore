@@ -1,4 +1,5 @@
 .DS_Store
-data/
+dataset/data/fashion/
+dataset/data/STL-Dataset/
 __pycache__
 *.csv
