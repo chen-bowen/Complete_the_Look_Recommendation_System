@@ -16,7 +16,7 @@ def download_and_save_image(res, image_category, image_type):
     """Get image from signature, image category and image type"""
     img_url = convert_to_url(res[image_type])
 
-    if not path.exists(f"data/{image_category}/{image_type}"):
+    if not path.exists(f"{image_category}/{image_type}"):
         mkdir(f"{image_category}/{image_type}")
 
     try:
