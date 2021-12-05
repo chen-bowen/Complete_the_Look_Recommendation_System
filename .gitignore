@@ -2,4 +2,14 @@
 dataset/data/fashion/
 dataset/data/STL-Dataset/
 __pycache__
+<<<<<<< HEAD
+<<<<<<< HEAD
+*.pickle
+.metals
+.vscode
+=======
 *.csv
+>>>>>>> c52c6df5af7c88ecc8f9a702375bf02e5f3e8967
+=======
+*.csv
+>>>>>>> 8f8c3750e9c30ffea16b386eec6d244f749bc441
