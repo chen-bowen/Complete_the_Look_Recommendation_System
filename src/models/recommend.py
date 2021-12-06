@@ -31,33 +31,18 @@ def recommend_similar_products(product_id, top_n=5):
     ].to_dict(orient="records")
 
     return {
-        "input_product": product_metadata,
+        "input_product": product_metadata[0],
         "recommended_products": recommended_products_metadata,
     }
 
 
 if __name__ == "__main__":
     recommendations = recommend_similar_products(product_id=7)
+
+    from utils.show_images import print_image
+
     print(recommendations)
-# input1 = torch.randn(1, 128)
-# input2 = torch.randn(100, 128)
-# input1 = torch.Tensor([9, 61, 52, 17, 95, 10, 71, 21, 58])
-# input2 = torch.Tensor([
-# [33,60,18,61,68,22,69,72,82],
-# [50,15,28,25,80,84,29,61,41],
-# [32,38,34,34,65,79,20,94,54],
-# [57,82,43,94,15,4,26,92,90],
-# [16,13,6,95,68,64,8,37,2],
-# [33,60,18,61,68,22,69,72,82],
-# [50,15,28,25,80,84,29,61,41],
-# [32,38,34,34,65,79,20,94,54],
-# [57,82,43,94,15,4,26,92,90],
-# [16,13,6,95,68,64,8,37,2]])
-
-# plot_similarity_distribution(simlarity_score)
-
-# print(input1)
-# print(input2)
-# print(simlarity_score)
-# print(topFiveImageSimilarity)
-# print(topFiveImagesIds)
+    print_image(
+        recommendations["input_product"]["image_path"],
+        *[rec["image_path"] for rec in recommendations["recommended_products"]],
+    )
