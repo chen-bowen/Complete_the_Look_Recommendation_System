@@ -17,6 +17,7 @@ def calculate_similarity(source_vector, destination_vector, sim_function):
     ​"""
     if sim_function == "cosine":
         cos = nn.CosineSimilarity(dim=1, eps=1e-6)
+        # breakpoint()
         simlarity_score = cos(source_vector, destination_vector)
 
     elif sim_function == "euclidean":

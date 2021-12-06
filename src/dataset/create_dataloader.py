@@ -76,4 +76,4 @@ if __name__ == "__main__":
 
     build_metadata_csv()
     dl = dataloader()
-    breakpoint()
+    

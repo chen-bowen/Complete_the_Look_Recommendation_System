@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from similarity import calculate_similarity, plot_similarity_distribution
+from similarity import calculate_similarity
 
 # input1 = torch.randn(1, 128)
 # input2 = torch.randn(100, 128)
@@ -23,13 +23,13 @@ input2 = torch.Tensor(
     ]
 )
 
-simlarity_score, topFiveImageSimilarity, topFiveImagesIds = calculate_similarity(
+simlarity_score = calculate_similarity(
     input1, input2, "cosine"
 )
-plot_similarity_distribution(simlarity_score)
+# plot_similarity_distribution(simlarity_score)
 
 print(input1)
 print(input2)
 print(simlarity_score)
-print(topFiveImageSimilarity)
-print(topFiveImagesIds)
+# print(topFiveImageSimilarity)
+# print(topFiveImagesIds)
