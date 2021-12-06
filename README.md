@@ -2,7 +2,8 @@
 
 
 ### File Structure
-.
+
+```
 ├── src
 │   ├── config
 │   │   ├── __init__.py
@@ -35,3 +36,5 @@
 │   └── __init__.py
 ├── README.md
 └── environment.yaml
+
+```
