@@ -1,5 +1,5 @@
 # import libraries
-import cv2
+from config import config as cfg
 from matplotlib import pyplot as plt
 
 
@@ -13,15 +13,12 @@ def print_image(im1, im2, im3, im4, im5, im6):
     columns = 5  # 2
 
     # reading images
-    Image1 = cv2.cvtColor(cv2.imread(im1), cv2.COLOR_RGB2BGR)
-    Image2 = cv2.cvtColor(cv2.imread(im2), cv2.COLOR_RGB2BGR)
-    Image3 = cv2.cvtColor(cv2.imread(im3), cv2.COLOR_RGB2BGR)
-    Image4 = cv2.cvtColor(cv2.imread(im4), cv2.COLOR_RGB2BGR)
-    Image5 = cv2.cvtColor(cv2.imread(im5), cv2.COLOR_RGB2BGR)
-    Image6 = cv2.cvtColor(cv2.imread(im6), cv2.COLOR_RGB2BGR)
-    # cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-
-    # fig = plt.subplots(rows, columns, gridspec_kw={'height_ratios': [4, 1]})
+    Image1 = plt.imread(f"{cfg.DATASET_DIR}/{im1}")
+    Image2 = plt.imread(f"{cfg.DATASET_DIR}/{im2}")
+    Image3 = plt.imread(f"{cfg.DATASET_DIR}/{im3}")
+    Image4 = plt.imread(f"{cfg.DATASET_DIR}/{im4}")
+    Image5 = plt.imread(f"{cfg.DATASET_DIR}/{im5}")
+    Image6 = plt.imread(f"{cfg.DATASET_DIR}/{im6}")
 
     # Adds a subplot at the 1st position
     fig.add_subplot(rows, columns, 2)
