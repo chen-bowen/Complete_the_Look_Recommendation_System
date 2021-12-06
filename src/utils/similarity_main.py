@@ -1,5 +1,4 @@
 import numpy as np
-
 import torch
 import torch.nn as nn
 
@@ -10,6 +9,7 @@ from similarity import calculate_similarity, plot_similarity_distribution
 input1 = torch.Tensor([9, 61, 52, 17, 95, 10, 71, 21, 58])
 input2 = torch.Tensor(
     [
+        [9, 61, 52, 17, 95, 10, 71, 21, 58],
         [33, 60, 18, 61, 68, 22, 69, 72, 82],
         [50, 15, 28, 25, 80, 84, 29, 61, 41],
         [32, 38, 34, 34, 65, 79, 20, 94, 54],
@@ -23,13 +23,13 @@ input2 = torch.Tensor(
     ]
 )
 
-simlarity_rank, topFiveImageSimilarity, topFiveImagesIds = calculate_similarity(
-    input1, input2, "euclidean"
+simlarity_score, topFiveImageSimilarity, topFiveImagesIds = calculate_similarity(
+    input1, input2, "cosine"
 )
-plot_similarity_distribution(simlarity_rank)
+plot_similarity_distribution(simlarity_score)
 
 print(input1)
 print(input2)
-print(simlarity_rank)
+print(simlarity_score)
 print(topFiveImageSimilarity)
 print(topFiveImagesIds)
