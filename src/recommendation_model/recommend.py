@@ -11,7 +11,7 @@ idx = 10
 def recommend_similar_products(product_id, top_n):
     """takes in the product id and returns the top"""
     # get extracted features
-    breakpoint()
+    # breakpoint()
     with (open("./features/product_features.pickle", "rb")) as file:
         all_products_features = pickle.load(file)
 
@@ -21,7 +21,7 @@ def recommend_similar_products(product_id, top_n):
 
     # get query feature from product id
     product_metadata = metadata[metadata["product_id"] == product_id].to_dict()
-    product_feature_vec = all_products_features[product_id, :]
+    product_feature_vec = all_products_features[product_id, :] 
 
     # calculate similarities and get all of the 5 products metadata
     simlarity_rank, top_n_image_similarity, top_n_images_ids = calculate_similarity(
