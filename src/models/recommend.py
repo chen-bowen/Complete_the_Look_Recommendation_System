@@ -38,7 +38,7 @@ def recommend_similar_products(product_id, top_n=5):
 
 if __name__ == "__main__":
     recommendations = recommend_similar_products(product_id=7)
-    breakpoint()
+    print(recommendations)
 # input1 = torch.randn(1, 128)
 # input2 = torch.randn(100, 128)
 # input1 = torch.Tensor([9, 61, 52, 17, 95, 10, 71, 21, 58])
