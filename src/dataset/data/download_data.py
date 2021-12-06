@@ -1,7 +1,7 @@
 import concurrent.futures
 import json
 import urllib.request
-from os import mkdir, path
+from os import makedirs, path
 
 import tqdm
 
@@ -17,7 +17,7 @@ def download_and_save_image(res, image_category, image_type):
     img_url = convert_to_url(res[image_type])
 
     if not path.exists(f"{image_category}/{image_type}"):
-        mkdir(f"{image_category}/{image_type}")
+        makedirs(f"{image_category}/{image_type}")
 
     try:
         urllib.request.urlretrieve(
