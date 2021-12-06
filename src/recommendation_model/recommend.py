@@ -7,11 +7,12 @@ from src.dataset.create_dataloader import dataloader
 from src.utils.similarity import (calculate_similarity,
                                   plot_similarity_distribution)
 
-
+idx = 10
 def recommend_similar_products(product_id, top_n):
     """takes in the product id and returns the top"""
     # get extracted features
-    with (open("../features/product_features.pickle", "rb")) as file:
+    breakpoint()
+    with (open("./features/product_features.pickle", "rb")) as file:
         all_products_features = pickle.load(file)
 
     # get dataset metadata dataframe
@@ -37,6 +38,8 @@ def recommend_similar_products(product_id, top_n):
         "recommended_products": recommended_products_metadata,
     }
 
+if __name__ == "__main__":
+    recommend_similar_products(idx,5)
 
 # input1 = torch.randn(1, 128)
 # input2 = torch.randn(100, 128)
