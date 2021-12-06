@@ -43,7 +43,9 @@ def get_images(image_category, image_type):
             executor.submit(download_and_save_image, json.loads(res), image_category, image_type)
             for res in image_list
         }
-        for future in tqdm.tqdm(concurrent.futures.as_completed(future_to_url)):
+        for future in tqdm.tqdm(
+            concurrent.futures.as_completed(future_to_url), total=len(future_to_url)
+        ):
             try:
                 url = future_to_url[future]
             except Exception as e:
