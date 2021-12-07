@@ -29,7 +29,9 @@ def recommend_similar_products(product_id, top_n=5):
 
     # get top 5 products metadata
     recommended_products_metadata = (
-        metadata[(metadata["similarity_score"] != 1)]
+        metadata[
+            (metadata["product_type"] == product_category) & (metadata["similarity_score"] != 1)
+        ]
         .sort_values(by="similarity_score", ascending=False)
         .head(top_n)
         .to_dict(orient="records")
@@ -41,7 +43,9 @@ def recommend_similar_products(product_id, top_n=5):
 
 
 if __name__ == "__main__":
-    recommendations = recommend_similar_products(product_id=140)
+    import random
+
+    recommendations = recommend_similar_products(product_id=random.randint(1, 38000))
 
     from utils.show_images import print_image
 
@@ -49,4 +53,5 @@ if __name__ == "__main__":
     print_image(
         recommendations["input_product"]["image_path"],
         *[rec["image_path"] for rec in recommendations["recommended_products"]],
+        [round(rec["similarity_score"], 3) for rec in recommendations["recommended_products"]],
     )
