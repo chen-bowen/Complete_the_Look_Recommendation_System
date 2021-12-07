@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision
 import tqdm
+from config import config as cfg
 from src.dataset.create_dataloader import dataloader
 from torchvision import models
 
@@ -20,7 +21,7 @@ def extractor():
     Instead of stack we could just concat all the tensors together which would leave us with a shape of (samples,features)
     """
     data_loader = dataloader()
-    resnet = models.resnet18(pretrained=True)
+    resnet = models.resnet50(pretrained=True)
     resnet.fc = nn.Identity()
     resnet.eval()
     transforms = torchvision.transforms.Resize(256)
@@ -33,7 +34,7 @@ def extractor():
             all_features.append(batch_features)
     all_features = torch.cat(all_features)
 
-    with open(f"{IMAGE_TYPE}_features.pickle", "wb") as handle:
+    with open(f"{cfg.PACKAGE_ROOT}/features/{IMAGE_TYPE}_features.pickle", "wb") as handle:
         pickle.dump(all_features, handle, protocol=pickle.HIGHEST_PROTOCOL)
     return all_features
 
