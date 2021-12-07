@@ -34,7 +34,7 @@ def print_image(im1, im2, im3, im4, im5, im6, simlarity_scores):
     # showing image
     plt.imshow(Image2)
     plt.axis("off")
-    plt.title(f"1 - {simlarity_scores[0]}")
+    plt.title(f"Option #1 \n Score: {round(simlarity_scores[0],2)}")
 
     # Adds a subplot at the 3rd position
     fig.add_subplot(rows, columns, 7)
@@ -42,7 +42,7 @@ def print_image(im1, im2, im3, im4, im5, im6, simlarity_scores):
     # showing image
     plt.imshow(Image3)
     plt.axis("off")
-    plt.title(f"2 - {simlarity_scores[1]}")
+    plt.title(f"Option #2 \n Score: {round(simlarity_scores[1],2)}")
 
     # Adds a subplot at the 4th position
     fig.add_subplot(rows, columns, 8)
@@ -50,7 +50,7 @@ def print_image(im1, im2, im3, im4, im5, im6, simlarity_scores):
     # showing image
     plt.imshow(Image4)
     plt.axis("off")
-    plt.title(f"3 - {simlarity_scores[2]}")
+    plt.title(f"Option #3 \n Score: {round(simlarity_scores[2],2)}")
 
     # Adds a subplot at the 5th position
     fig.add_subplot(rows, columns, 9)
@@ -58,7 +58,7 @@ def print_image(im1, im2, im3, im4, im5, im6, simlarity_scores):
     # showing image
     plt.imshow(Image5)
     plt.axis("off")
-    plt.title(f"4 - {simlarity_scores[3]}")
+    plt.title(f"Option #4 \n Score: {round(simlarity_scores[3],2)}")
 
     # Adds a subplot at the 5th position
     fig.add_subplot(rows, columns, 10)
@@ -66,7 +66,7 @@ def print_image(im1, im2, im3, im4, im5, im6, simlarity_scores):
     # showing image
     plt.imshow(Image6)
     plt.axis("off")
-    plt.title(f"5 - {simlarity_scores[4]}")
+    plt.title(f"Option #5 \n Score: {round(simlarity_scores[4],2)}")
 
     plt.savefig("2by5.png")
     plt.show()
