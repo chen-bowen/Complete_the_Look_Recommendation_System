@@ -36,7 +36,7 @@ def recommend_similar_products(product_id, top_n=5):
     }
 
 if __name__ == "__main__":
-    recommendations = recommend_similar_products(product_id=7)
+    recommendations = recommend_similar_products(product_id=200)
 
     from utils.show_images import print_image
 
