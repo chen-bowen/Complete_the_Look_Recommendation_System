@@ -17,27 +17,31 @@ def recommend_similar_products(product_id, top_n=5):
     metadata = data_loader.dataset.metadata
 
     # get query feature from product id
-    product_metadata = metadata[metadata["product_id"] == product_id].to_dict(orient="records")
+    product_metadata = metadata[metadata["product_id"] == product_id].to_dict(orient="records")[0]
     product_feature_vec = all_products_features[product_id, :]
 
     # calculate similarities and get all of the 5 products metadata
     simlarity_score = calculate_similarity(product_feature_vec, all_products_features, "cosine")
 
-    top_n_image_similarity, top_n_images_ids = torch.topk(simlarity_score, top_n + 1)
+    # get query product category and filter the prpduct catelog for the same category
+    product_category = product_metadata["product_type"]
+    metadata["similarity_score"] = simlarity_score
 
     # get top 5 products metadata
-    recommended_products_metadata = metadata[
-        metadata["product_id"].isin(top_n_images_ids[1:].numpy().tolist())
-    ].to_dict(orient="records")
-
+    recommended_products_metadata = (
+        metadata[(metadata["similarity_score"] != 1)]
+        .sort_values(by="similarity_score", ascending=False)
+        .head(top_n)
+        .to_dict(orient="records")
+    )
     return {
-        "input_product": product_metadata[0],
+        "input_product": product_metadata,
         "recommended_products": recommended_products_metadata,
     }
 
 
 if __name__ == "__main__":
-    recommendations = recommend_similar_products(product_id=7)
+    recommendations = recommend_similar_products(product_id=140)
 
     from utils.show_images import print_image
 
