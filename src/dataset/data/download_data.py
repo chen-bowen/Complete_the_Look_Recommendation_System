@@ -95,9 +95,7 @@ def download_and_save_inages_complete_the_look(res, image_category, image_type):
             )
 
     except Exception as e:
-
         print("error:", e)
-        breakpoint()
         print(f"Failed to download image {img_url}")
         pass
 

@@ -1,6 +1,5 @@
 import pickle
 
-import torch
 from config import config as cfg
 from src.dataset.create_dataloader import dataloader
 from src.utils.similarity import calculate_similarity
@@ -47,10 +46,10 @@ if __name__ == "__main__":
 
     recommendations = recommend_similar_products(product_id=random.randint(1, 38000))
 
-    from utils.show_images import print_image
+    from utils.image_utils import display_recommended_products
 
     print(recommendations)
-    print_image(
+    display_recommended_products(
         recommendations["input_product"]["image_path"],
         *[rec["image_path"] for rec in recommendations["recommended_products"]],
         [round(rec["similarity_score"], 3) for rec in recommendations["recommended_products"]],
