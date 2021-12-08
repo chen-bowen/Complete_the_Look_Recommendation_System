@@ -1,7 +1,7 @@
 import pickle
 
 import torch
-from config import config as cfg
+from src.config import config as cfg
 from src.dataset.create_dataloader import dataloader
 from src.utils.similarity import calculate_similarity
 

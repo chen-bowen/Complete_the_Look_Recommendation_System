@@ -1,9 +1,9 @@
 # import libraries
-from config import config as cfg
+from src.config import config as cfg
 from matplotlib import pyplot as plt
 
 
-def print_image(im1, im2, im3, im4, im5, im6, simlarity_scores):
+def print_image(im1, im2, im3, im4, im5, im6, simlarity_scores, save_image=True):
 
     # create figure
     fig = plt.figure(figsize=(10, 7))
@@ -67,9 +67,11 @@ def print_image(im1, im2, im3, im4, im5, im6, simlarity_scores):
     plt.imshow(Image6)
     plt.axis("off")
     plt.title(f"Option #5 \n Score: {round(simlarity_scores[4],2)}")
-
-    plt.savefig("2by5.png")
-    plt.show()
+    if(save_image):
+        plt.savefig("2by5.png")
+        plt.show()
+    else:
+        return fig
 
 
 if __name__ == "__main__":
