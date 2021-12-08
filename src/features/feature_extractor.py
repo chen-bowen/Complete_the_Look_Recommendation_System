@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision
 import tqdm
-from config import config as cfg
+from src.config import config as cfg
 from src.dataset.create_dataloader import dataloader
 from torchvision import models
 

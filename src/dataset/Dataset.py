@@ -1,7 +1,7 @@
 import os
 
 import pandas as pd
-from config import config as cfg
+from src.config import config as cfg
 from PIL import Image
 from torch.utils.data import Dataset
 

@@ -1,5 +1,5 @@
 # import libraries
-from config import config as cfg
+from src.config import config as cfg
 from matplotlib import pyplot as plt
 
 
@@ -28,7 +28,7 @@ def convert_to_url(signature):
     return prefix % (signature[0:2], signature[2:4], signature[4:6], signature)
 
 
-def display_recommended_products(im1, im2, im3, im4, im5, im6, simlarity_scores):
+def display_recommended_products(im1, im2, im3, im4, im5, im6, simlarity_scores, save_image=True):
 
     # create figure
     fig = plt.figure(figsize=(10, 7))
@@ -93,5 +93,8 @@ def display_recommended_products(im1, im2, im3, im4, im5, im6, simlarity_scores)
     plt.axis("off")
     plt.title(f"Option #5 \n Score: {round(simlarity_scores[4],2)}")
 
-    plt.savefig("2by5.png")
-    plt.show()
+    if(save_image):
+        plt.savefig("2by5.png")
+        plt.show()
+    else:
+        return fig

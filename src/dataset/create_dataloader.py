@@ -2,11 +2,11 @@ import json
 import os
 
 import pandas as pd
-from config import config as cfg
+from src.config import config as cfg
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
-from dataset.Dataset import FashionProductSTLDataset
+from src.dataset.Dataset import FashionProductDataset
 
 
 def build_metadata_csv():
