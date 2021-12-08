@@ -24,7 +24,7 @@ def extractor():
     resnet = models.resnet18(pretrained=True)
     resnet.fc = nn.Identity()
     resnet.eval()
-    transforms = torchvision.transforms.Resize(256)
+    transforms = torchvision.transforms.Resize(100)
     all_features = []
     for batch in tqdm.tqdm(data_loader):
         X = transforms(batch)  # resizes to 256 X 256 for ResNet
