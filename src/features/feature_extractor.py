@@ -21,7 +21,7 @@ def extractor():
     Instead of stack we could just concat all the tensors together which would leave us with a shape of (samples,features)
     """
     data_loader = dataloader()
-    resnet = models.resnet50(pretrained=True)
+    resnet = models.resnet18(pretrained=True)
     resnet.fc = nn.Identity()
     resnet.eval()
     transforms = torchvision.transforms.Resize(256)
