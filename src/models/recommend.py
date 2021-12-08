@@ -29,7 +29,9 @@ def recommend_similar_products(product_id, top_n=5):
 
     # get top 5 products metadata
     recommended_products_metadata = (
-        metadata[(metadata["similarity_score"] != 1)]
+        metadata[
+            (metadata["product_type"] == product_category) & (metadata["similarity_score"] != 1)
+        ]
         .sort_values(by="similarity_score", ascending=False)
         .head(top_n)
         .to_dict(orient="records")
