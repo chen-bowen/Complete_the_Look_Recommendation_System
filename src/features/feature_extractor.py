@@ -6,7 +6,7 @@ import torch.optim as optim
 import torchvision
 import tqdm
 from src.config import config as cfg
-from src.dataset.create_dataloader import dataloader
+from src.dataset.create_dataloader import stl_dataloader
 from torchvision import models
 
 IMAGE_TYPE = "product"
@@ -20,7 +20,7 @@ def extractor():
 
     Instead of stack we could just concat all the tensors together which would leave us with a shape of (samples,features)
     """
-    data_loader = dataloader()
+    data_loader = stl_dataloader()
     resnet = models.resnet18(pretrained=True)
     resnet.fc = nn.Identity()
     resnet.eval()

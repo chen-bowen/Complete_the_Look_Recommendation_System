@@ -8,11 +8,11 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 
 
-def build_metadata_csv():
+def build_stl_metadata_csv():
     """Creates the metadata csv file that could be used for image data generator"""
 
     # if the file exists, skip
-    if os.path.exists(f"{cfg.DATASET_DIR}/dataset_metadata.csv"):
+    if os.path.exists(f"{cfg.DATASET_DIR}/dataset_metadata_stl.csv"):
         return
 
     images_df = []
@@ -43,10 +43,10 @@ def build_metadata_csv():
     images_df.columns = ["product_id", "image_path", "product_type", "image_type"]
 
     # save to csv
-    images_df.to_csv(f"{cfg.DATASET_DIR}/dataset_metadata.csv", index=False)
+    images_df.to_csv(f"{cfg.DATASET_DIR}/dataset_metadata_stl.csv", index=False)
 
 
-def dataloader(metadata_csv=f"{cfg.DATASET_DIR}/dataset_metadata.csv"):
+def stl_dataloader(metadata_csv=f"{cfg.DATASET_DIR}/dataset_metadata_stl.csv"):
 
     print("Creating data loader...")
 
@@ -60,7 +60,7 @@ def dataloader(metadata_csv=f"{cfg.DATASET_DIR}/dataset_metadata.csv"):
         ]
     )
 
-    # create the dataset and the dataloader
+    # create the dataset and the stl_dataloader
     dataset = FashionProductSTLDataset(
         cfg.RAW_DATA_FOLDER, metadata_csv, transform=transformations, subset="product"
     )
@@ -73,6 +73,5 @@ def dataloader(metadata_csv=f"{cfg.DATASET_DIR}/dataset_metadata.csv"):
 
 if __name__ == "__main__":
 
-    build_metadata_csv()
-    dl = dataloader()
-    breakpoint()
+    build_stl_metadata_csv()
+    dl = stl_dataloader()

@@ -1,6 +1,9 @@
 # import libraries
-from src.config import config as cfg
+import os
+
 from matplotlib import pyplot as plt
+from PIL import Image
+from src.config import config as cfg
 
 
 def bounding_box_process(img, bbox):
@@ -93,8 +96,19 @@ def display_recommended_products(im1, im2, im3, im4, im5, im6, simlarity_scores,
     plt.axis("off")
     plt.title(f"Option #5 \n Score: {round(simlarity_scores[4],2)}")
 
-    if(save_image):
-        plt.savefig("2by5.png")
-        plt.show()
+    if save_image:
+        # save all recommendation layout
+        if not os.path.exists(cfg.RETURNED_IMAGE_DIR):
+            os.makedirs(cfg.RETURNED_IMAGE_DIR)
+        plt.savefig(f"{cfg.RETURNED_IMAGE_DIR}/recommendation_all.png")
+
+        # save individual recommendation image
+        input_img = Image.open(f"{cfg.DATASET_DIR}/{im1}").resize((200, 200))
+        input_img.save(f"{cfg.RETURNED_IMAGE_DIR}/input_product.png")
+
+        for i, im_path in enumerate([im2, im3, im4, im5, im6]):
+            img = Image.open(f"{cfg.DATASET_DIR}/{im_path}").resize((200, 200))
+            img.save(f"{cfg.RETURNED_IMAGE_DIR}/recommendation_{i+1}.png")
+
     else:
         return fig
