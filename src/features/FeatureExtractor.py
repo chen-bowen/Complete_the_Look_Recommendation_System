@@ -52,4 +52,6 @@ class FeatureExtractor:
 
 
 if __name__ == "__main__":
-    FeatureExtractor(dataloader=FashionProductSTLDataloader().data_loader())
+    FeatureExtractor(
+        data_loader=FashionProductSTLDataloader().data_loader(), dataset_name="product"
+    ).similar_product_embedding()
