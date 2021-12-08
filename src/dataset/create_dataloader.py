@@ -3,10 +3,9 @@ import os
 
 import pandas as pd
 from src.config import config as cfg
+from src.dataset.Dataset import FashionProductSTLDataset
 from torch.utils.data import DataLoader
 from torchvision import transforms
-
-from src.dataset.Dataset import FashionProductDataset
 
 
 def build_metadata_csv():
