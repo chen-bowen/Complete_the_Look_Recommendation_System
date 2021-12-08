@@ -4,6 +4,7 @@ import os
 import pandas as pd
 from src.config import config as cfg
 from src.dataset.Dataset import FashionProductSTLDataset
+from src.utils.image_utils import convert_to_url
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
@@ -34,13 +35,19 @@ def build_stl_metadata_csv():
                     # get image product type
                     product_type = product_types[image_name.split(".")[0]]
                     row = pd.DataFrame(
-                        [product_id, f".{img_path}", product_type, class_folder_name]
+                        [
+                            product_id,
+                            f".{img_path}",
+                            product_type,
+                            convert_to_url(image_name.split(".")[0]),
+                            class_folder_name,
+                        ]
                     ).T
                     images_df.append(row)
 
     # concatenate the final df
     images_df = pd.concat(images_df, axis=0, ignore_index=True)
-    images_df.columns = ["product_id", "image_path", "product_type", "image_type"]
+    images_df.columns = ["product_id", "image_path", "product_type", "image_url", "image_type"]
 
     # save to csv
     images_df.to_csv(f"{cfg.DATASET_DIR}/dataset_metadata_stl.csv", index=False)
