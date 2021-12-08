@@ -64,7 +64,6 @@ class FashionProductSTLDataloader:
         transformations = transforms.Compose(
             [
                 transforms.Resize((cfg.HEIGHT, cfg.WIDTH)),
-                # transforms.RandomCrop((299, 299)),
                 transforms.ToTensor(),
                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
             ]

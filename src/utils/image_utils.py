@@ -1,6 +1,7 @@
 # import libraries
 import os
 
+import numpy as np
 from matplotlib import pyplot as plt
 from PIL import Image
 from src.config import config as cfg
@@ -41,12 +42,13 @@ def display_recommended_products(im1, im2, im3, im4, im5, im6, simlarity_scores,
     columns = 5  # 2
 
     # reading images
-    Image1 = plt.imread(f"{cfg.DATASET_DIR}/{im1}")
-    Image2 = plt.imread(f"{cfg.DATASET_DIR}/{im2}")
-    Image3 = plt.imread(f"{cfg.DATASET_DIR}/{im3}")
-    Image4 = plt.imread(f"{cfg.DATASET_DIR}/{im4}")
-    Image5 = plt.imread(f"{cfg.DATASET_DIR}/{im5}")
-    Image6 = plt.imread(f"{cfg.DATASET_DIR}/{im6}")
+    input_image_size = Image.open(f"{cfg.DATASET_DIR}/{im1}").size
+    Image1 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im1}"))
+    Image2 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im2}").resize(input_image_size))
+    Image3 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im3}").resize(input_image_size))
+    Image4 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im4}").resize(input_image_size))
+    Image5 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im5}").resize(input_image_size))
+    Image6 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im6}").resize(input_image_size))
 
     # Adds a subplot at the 1st position
     fig.add_subplot(rows, columns, 2)
@@ -103,11 +105,11 @@ def display_recommended_products(im1, im2, im3, im4, im5, im6, simlarity_scores,
         plt.savefig(f"{cfg.RETURNED_IMAGE_DIR}/recommendation_all.png")
 
         # save individual recommendation image
-        input_img = Image.open(f"{cfg.DATASET_DIR}/{im1}").resize((200, 200))
+        input_img = Image.open(f"{cfg.DATASET_DIR}/{im1}")
         input_img.save(f"{cfg.RETURNED_IMAGE_DIR}/input_product.png")
 
         for i, im_path in enumerate([im2, im3, im4, im5, im6]):
-            img = Image.open(f"{cfg.DATASET_DIR}/{im_path}").resize((200, 200))
+            img = Image.open(f"{cfg.DATASET_DIR}/{im_path}").resize(input_img.size)
             img.save(f"{cfg.RETURNED_IMAGE_DIR}/recommendation_{i+1}.png")
 
     else:
