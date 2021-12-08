@@ -1,6 +1,8 @@
 .DS_Store
 src/dataset/data/fashion/
 src/dataset/data/STL-Dataset/
+src/dataset/data/complete-the-look-dataset/
+src/dataset/data/fashion_v2/
 __pycache__
 *.pickle
 .metals

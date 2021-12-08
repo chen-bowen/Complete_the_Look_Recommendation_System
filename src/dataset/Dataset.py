@@ -6,7 +6,7 @@ from PIL import Image
 from torch.utils.data import Dataset
 
 
-class FashionProductDataset(Dataset):
+class FashionProductSTLDataset(Dataset):
     def __init__(self, image_dir, metadata_file, transform=None, subset=None):
         self.image_dir = image_dir
         self.metadata = (
