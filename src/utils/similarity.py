@@ -10,11 +10,11 @@ def calculate_similarity(source_vector, destination_vector, sim_function):
     1. source_vector - the scene image too which we need to map the products - 1D tensor
     2. destination_vector - the destination product images as tensors - 2D tensor
     3. sim_function - similarity function to be used
-    ​
+
     Outputs:
     top_5_image_similarity - col1: image index, col2: cosine similarity
     top_five_images_ids - tensor with top n image ids in the descending order of similarity
-    ​"""
+    """
     if sim_function == "cosine":
         cos = nn.CosineSimilarity(dim=1, eps=1e-6)
         # breakpoint()
@@ -27,13 +27,3 @@ def calculate_similarity(source_vector, destination_vector, sim_function):
         return torch.zeros(destination_vector.size(0))
 
     return simlarity_score
-
-
-# def plot_similarity_distribution(simlarity_score):
-#     plt.hist(
-#         simlarity_score.detach().numpy(), density=False, bins=10
-#     )  # density=False would make counts
-#     plt.ylabel("Count")
-#     plt.xlabel("Similarity")
-#     plt.show()
-#     return

@@ -6,7 +6,7 @@ from config import config as cfg
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
-from dataset.Dataset import FashionProductDataset
+from dataset.Dataset import FashionProductSTLDataset
 
 
 def build_metadata_csv():
@@ -62,7 +62,7 @@ def dataloader(metadata_csv=f"{cfg.DATASET_DIR}/dataset_metadata.csv"):
     )
 
     # create the dataset and the dataloader
-    dataset = FashionProductDataset(
+    dataset = FashionProductSTLDataset(
         cfg.RAW_DATA_FOLDER, metadata_csv, transform=transformations, subset="product"
     )
     data_loader = DataLoader(dataset, batch_size=cfg.BATCH_SIZE, shuffle=True, num_workers=0)

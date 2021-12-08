@@ -3,7 +3,32 @@ from config import config as cfg
 from matplotlib import pyplot as plt
 
 
-def print_image(im1, im2, im3, im4, im5, im6):
+def bounding_box_process(img, bbox):
+    """
+    takes in the image and bounding box information,
+    and returns bounding boxes in x_min, y_min, x_max, y_max
+    """
+    # get image shape and bounding box information
+    img_height, img_width = img.shape()
+    x, y, w, h = bbox
+
+    # get bouding box coordinates
+    x_min = img_width * x
+    y_min = img_height * y
+
+    x_max = x_min + img_width * w
+    y_max = y_min + img_height * h
+
+    return x_min, y_min, x_max, y_max
+
+
+def convert_to_url(signature):
+    """convert image"""
+    prefix = "http://i.pinimg.com/400x/%s/%s/%s/%s.jpg"
+    return prefix % (signature[0:2], signature[2:4], signature[4:6], signature)
+
+
+def display_recommended_products(im1, im2, im3, im4, im5, im6, simlarity_scores):
 
     # create figure
     fig = plt.figure(figsize=(10, 7))
@@ -34,7 +59,7 @@ def print_image(im1, im2, im3, im4, im5, im6):
     # showing image
     plt.imshow(Image2)
     plt.axis("off")
-    plt.title("Suggestion 1")
+    plt.title(f"Option #1 \n Score: {round(simlarity_scores[0],2)}")
 
     # Adds a subplot at the 3rd position
     fig.add_subplot(rows, columns, 7)
@@ -42,7 +67,7 @@ def print_image(im1, im2, im3, im4, im5, im6):
     # showing image
     plt.imshow(Image3)
     plt.axis("off")
-    plt.title("Suggestion 2")
+    plt.title(f"Option #2 \n Score: {round(simlarity_scores[1],2)}")
 
     # Adds a subplot at the 4th position
     fig.add_subplot(rows, columns, 8)
@@ -50,7 +75,7 @@ def print_image(im1, im2, im3, im4, im5, im6):
     # showing image
     plt.imshow(Image4)
     plt.axis("off")
-    plt.title("Suggestion 3")
+    plt.title(f"Option #3 \n Score: {round(simlarity_scores[2],2)}")
 
     # Adds a subplot at the 5th position
     fig.add_subplot(rows, columns, 9)
@@ -58,7 +83,7 @@ def print_image(im1, im2, im3, im4, im5, im6):
     # showing image
     plt.imshow(Image5)
     plt.axis("off")
-    plt.title("Suggestion 4")
+    plt.title(f"Option #4 \n Score: {round(simlarity_scores[3],2)}")
 
     # Adds a subplot at the 5th position
     fig.add_subplot(rows, columns, 10)
@@ -66,17 +91,7 @@ def print_image(im1, im2, im3, im4, im5, im6):
     # showing image
     plt.imshow(Image6)
     plt.axis("off")
-    plt.title("Suggestion 5")
+    plt.title(f"Option #5 \n Score: {round(simlarity_scores[4],2)}")
 
     plt.savefig("2by5.png")
     plt.show()
-
-
-if __name__ == "__main__":
-    Image1 = "Data/1.png"
-    Image2 = "Data/1.png"
-    Image3 = "Data/1.png"
-    Image4 = "Data/1.png"
-    Image5 = "Data/1.png"
-    Image6 = "Data/1.png"
-    print_image(Image1, Image2, Image3, Image4, Image5, Image6)
