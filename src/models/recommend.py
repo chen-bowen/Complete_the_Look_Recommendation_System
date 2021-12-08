@@ -1,7 +1,7 @@
 import pickle
 
 from src.config import config as cfg
-from src.dataset.create_dataloader import stl_dataloader
+from src.dataset.Dataloader import FashionProductSTLDataloader
 from src.utils.similarity import calculate_similarity
 
 
@@ -12,7 +12,7 @@ def recommend_similar_products(product_id, top_n=5):
         all_products_features = pickle.load(file)
 
     # get dataset metadata dataframe
-    data_loader = stl_dataloader()
+    data_loader = FashionProductSTLDataloader().data_loader()
     metadata = data_loader.dataset.metadata
 
     # get query feature from product id
