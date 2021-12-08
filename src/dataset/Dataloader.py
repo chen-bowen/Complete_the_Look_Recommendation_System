@@ -14,9 +14,12 @@ class FashionProductSTLDataloader:
         self.build_metadata_csv()
 
     def build_metadata_csv(self):
-        """Creates the metadata csv file that could be used for image data generator"""
+        """
+        Creates the metadata csv file that could be used for image data generator,
+        metadata includes the following fields
+        "product_id", "image_path", "product_type", "image_url", "image_type"
+        """
         # if the file exists, skip
-
         if os.path.exists(f"{cfg.DATASET_DIR}/dataset_metadata_stl.csv"):
             return
 
@@ -74,7 +77,38 @@ class FashionProductSTLDataloader:
             transform=transformations,
             subset="product",
         )
-        return DataLoader(dataset, batch_size=cfg.BATCH_SIZE, shuffle=True, num_workers=0)
+        return DataLoader(dataset, batch_size=cfg.BATCH_SIZE, shuffle=False, num_workers=0)
+
+
+class FashionCompleteTheLookDataloader:
+    def __init__(self, image_type="train"):
+        self.image_type = image_type
+        self.build_metadata_csv()
+
+    @staticmethod
+    def sample_triplets():
+        pass
+
+    def build_metadata_csv(self):
+        """
+        Creates the metadata csv file that could be used for image data generator，
+        metadata includes a triplet of anchor, postive and negative image
+        """
+        # if the file exists, skip
+        if os.path.exists(f"{cfg.DATASET_DIR}/dataset_metadata_ctl.csv"):
+            return
+
+        img_file_map = {
+            "train": "./complete-the-look-dataset/datasets/raw_train.tsv",
+            "test": "./complete-the-look-dataset/datasets/raw_test.tsv",
+        }
+
+        # read csv metadata file
+        image_meta_df = pd.read_csv(
+            img_file_map[self.image_type], sep="\t", header=None, skiprows=1
+        )
+
+        #
 
 
 if __name__ == "__main__":
