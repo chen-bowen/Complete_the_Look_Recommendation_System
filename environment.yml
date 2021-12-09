@@ -1,0 +1,19 @@
+name: complete_the_look
+channels:
+  - pytorch
+  - defaults
+dependencies:
+  - python=3.9.7
+  - numpy
+  - pyyaml
+  - pip
+  - matplotlib
+  - scipy=1.6.2
+  - future=0.18.2
+  - pytorch=1.10.0
+  - urllib3=1.26.7
+  - pandas=1.3.4
+  - pillow=8.4.0
+  - tqdm=4.62.3
+  - torchvision=0.11.1
+  - torchaudio=0.10.0
