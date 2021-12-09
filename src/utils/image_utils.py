@@ -13,7 +13,7 @@ def bounding_box_process(img, bounding_box):
     and returns bounding boxes in x_min, y_min, x_max, y_max
     """
     # get image shape and bounding box information
-    img_height, img_width = img.size
+    img_width, img_height = img.size
     x, y, w, h = bounding_box
 
     # get bouding box coordinates

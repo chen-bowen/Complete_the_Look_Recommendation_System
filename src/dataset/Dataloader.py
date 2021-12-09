@@ -231,7 +231,6 @@ class FashionCompleteTheLookDataloader:
             f"{cfg.DATASET_DIR}/dataset_metadata_ctl_triplets.csv",
             transform=transformations,
         )
-        breakpoint()
         return DataLoader(dataset, batch_size=cfg.BATCH_SIZE, shuffle=False, num_workers=0)
 
 

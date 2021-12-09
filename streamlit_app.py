@@ -1,6 +1,6 @@
 import streamlit as st
 
-from src.models.recommend import recommend_similar_products
+from src.recommend import recommend_similar_products
 from src.utils.image_utils import display_recommended_products
 
 

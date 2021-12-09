@@ -10,7 +10,7 @@ from src.dataset.Dataloader import FashionProductSTLDataloader
 from torchvision import models
 
 
-class FeatureExtractor:
+class StyleEmbedding:
     """
     Feature extractor that generates different features according to data_loader and task
     """
@@ -52,6 +52,6 @@ class FeatureExtractor:
 
 
 if __name__ == "__main__":
-    FeatureExtractor(
+    StyleEmbedding(
         data_loader=FashionProductSTLDataloader().data_loader(), dataset_name="product"
     ).similar_product_embedding()

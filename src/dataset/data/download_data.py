@@ -18,23 +18,15 @@ def convert_to_url(signature):
 def download_and_save_image_stl(res, image_category, image_type):
     """Get image from signature, image category and image type"""
     img_url = convert_to_url(res[image_type])
-
-    if not path.exists(f"{image_category}/{image_type}"):
-        makedirs(f"{image_category}/{image_type}")
-
-    remaining_download_tries = 3
-    while remaining_download_tries > 0:
-        try:
-            urllib.request.urlretrieve(
-                img_url,
-                f"{image_category}/{image_type}/{res[image_type]}.jpg",
-            )
-        except Exception:
-            remaining_download_tries -= 1
-            continue
-        else:
-            print(f"Failed to download image {img_url} 3 times")
-            break
+    try:
+        urllib.request.urlretrieve(
+            img_url,
+            f"{image_category}/{image_type}/{res[image_type]}.jpg",
+        )
+    except Exception as e:
+        print(e)
+        print(f"Failed to download image {img_url} 3 times")
+        pass
 
 
 def get_images_stl(image_category, image_type):
@@ -46,16 +38,20 @@ def get_images_stl(image_category, image_type):
     img_file = open(img_file_map[image_category])
     image_list = img_file.readlines()
 
+    if not path.exists(f"{image_category}/{image_type}"):
+        makedirs(f"{image_category}/{image_type}")
+
     # check for existing images and remove them from the download list
     existed = [x[:-4] for x in listdir(f"{image_category}/{image_type}")]
-    image_list = [res for res in image_list if res not in existed]
+
+    image_list = [
+        json.loads(res) for res in image_list if json.loads(res)["product"] not in existed
+    ]
 
     # use thread pooling to speed up processing downloading images
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
         future_to_url = {
-            executor.submit(
-                download_and_save_image_stl, json.loads(res), image_category, image_type
-            )
+            executor.submit(download_and_save_image_stl, res, image_category, image_type)
             for res in image_list
         }
         for future in tqdm.tqdm(
@@ -70,51 +66,38 @@ def get_images_stl(image_category, image_type):
 def download_and_save_inages_complete_the_look(res, image_category, image_type):
     """Get image from signature, image category and image type"""
     img_url = convert_to_url(res["image_signature"])
+    try:
+        urllib.request.urlretrieve(
+            img_url,
+            f"{image_category}/{image_type}/{res['image_signature']}.jpg",
+        )
 
-    if not path.exists(f"{image_category}/{image_type}"):
-        makedirs(f"{image_category}/{image_type}")
+        # crop out the single product photo and save to train_single/test_single
+        img = Image.open(f"{image_category}/{image_type}/{res['image_signature']}.jpg")
 
-    if not path.exists(f"{image_category}/{image_type}_single"):
-        makedirs(f"{image_category}/{image_type}_single")
+        for bounding_box, product_type in zip(res["bounding_boxes"], res["product_type"]):
 
-    remaining_download_tries = 3
-    while remaining_download_tries > 0:
-        try:
-            urllib.request.urlretrieve(
-                img_url,
-                f"{image_category}/{image_type}/{res['image_signature']}.jpg",
+            # convert bounding box to its coordinates
+            img_width, img_height = img.size
+            x, y, w, h = bounding_box
+
+            # get bouding box coordinates
+            x_min = img_width * x
+            y_min = img_height * y
+
+            x_max = x_min + img_width * w
+            y_max = y_min + img_height * h
+
+            # crop and save the images
+            img_single = img.crop([x_min, y_min, x_max, y_max])
+            img_single.save(
+                f"{image_category}/{image_type}_single/{res['image_signature']}_{product_type}.jpg"
             )
 
-            # crop out the single product photo and save to train_single/test_single
-            img = Image.open(f"{image_category}/{image_type}/{res['image_signature']}.jpg")
-
-            for bounding_box, product_type in zip(res["bounding_boxes"], res["product_type"]):
-
-                # convert bounding box to its coordinates
-                img_height, img_width = img.size
-                x, y, w, h = bounding_box
-
-                # get bouding box coordinates
-                x_min = img_width * x
-                y_min = img_height * y
-
-                x_max = x_min + img_width * w
-                y_max = y_min + img_height * h
-
-                # crop and save the images
-                img_single = img.crop([x_min, y_min, x_max, y_max])
-                img_single.save(
-                    f"{image_category}/{image_type}_single/{res['image_signature']}_{product_type}.jpg"
-                )
-
-        except Exception as e:
-            print(e)
-            remaining_download_tries -= 1
-            time.sleep(0.1)
-            continue
-        else:
-            print(f"Failed to download image {img_url} 3 times")
-            break
+    except Exception as e:
+        print(e)
+        print(f"Failed to download image {img_url} 3 times")
+        pass
 
 
 def get_images_complete_the_look(image_category, image_type):
@@ -124,6 +107,13 @@ def get_images_complete_the_look(image_category, image_type):
         "triplet_train_1": "./complete-the-look-dataset/datasets/triplet_train_p1.tsv",
         "triplet_train_2": "./complete-the-look-dataset/datasets/triplet_train_p2.tsv",
     }
+    # set up directory structure
+    if not path.exists(f"{image_category}/{image_type}"):
+        makedirs(f"{image_category}/{image_type}")
+
+    if not path.exists(f"{image_category}/{image_type}_single"):
+        makedirs(f"{image_category}/{image_type}_single")
+
     image_meta_df = pd.read_csv(img_file_map[image_type], sep="\t", header=None, skiprows=1)
     image_meta_df.columns = "image_signature bounding_x  bounding_y  bounding_width  bounding_height product_type".split()
     image_meta_df["bounding_boxes"] = image_meta_df.apply(
