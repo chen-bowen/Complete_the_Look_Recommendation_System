@@ -78,7 +78,7 @@ def download_and_save_inages_complete_the_look(res, image_category, image_type):
         for bounding_box, product_type in zip(res["bounding_boxes"], res["product_type"]):
 
             # convert bounding box to its coordinates
-            img_height, img_width = img.size
+            img_width, img_height = img.size
             x, y, w, h = bounding_box
 
             # get bouding box coordinates

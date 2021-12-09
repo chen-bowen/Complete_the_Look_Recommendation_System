@@ -70,4 +70,4 @@ class FashionProductCTLTripletDataset(Dataset):
         if self.transform is not None:
             img_triplets = [self.transform(img) for img in img_triplets]
 
-        return img_triplets
+        return tuple(img_triplets)
