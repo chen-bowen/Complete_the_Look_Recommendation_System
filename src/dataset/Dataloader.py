@@ -4,7 +4,7 @@ import random
 
 import pandas as pd
 from src.config import config as cfg
-from src.dataset.Dataset import FashionProductSTLDataset
+from src.dataset.Dataset import FashionProductCTLTripletDataset, FashionProductSTLDataset
 from src.utils.image_utils import convert_to_url
 from torch.utils.data import DataLoader
 from torchvision import transforms
@@ -61,6 +61,7 @@ class FashionProductSTLDataloader:
         images_df.to_csv(f"{cfg.DATASET_DIR}/dataset_metadata_stl.csv", index=False)
 
     def data_loader(self):
+        """Dataloader for FashionProductSTLDataset"""
         # define transformations
         transformations = transforms.Compose(
             [
@@ -105,74 +106,43 @@ class FashionCompleteTheLookDataloader:
 
             # shuffle items
             random.shuffle(items)
-            for i in range(0, len(items) - 1):
-                for j in range(i + 1, len(items)):
+            for anchor in range(0, len(items) - 1):
+                for pos in range(anchor + 1, len(items)):
 
                     # filter restriction
                     if MAX_TRIPLETS_PER_OUTFIT and pairs_from_outfit >= MAX_TRIPLETS_PER_OUTFIT:
                         continue
 
-                    i_label = items[i]["product_type"]
-                    j_label = items[j]["product_type"]
-
-                    if SKIP_IF_POS_SAME_CATEGORY_AS_ANCHOR and i_label == j_label:
+                    # skip id positive image the same as anchor
+                    if (
+                        SKIP_IF_POS_SAME_CATEGORY_AS_ANCHOR
+                        and items[anchor]["product_type"] == items[pos]["product_type"]
+                    ):
                         continue
 
-                    anchor = i
-                    pos = j
-
-                    # anchor image bounding box
-                    i_x = items[anchor]["x"]
-                    i_y = items[anchor]["y"]
-                    i_w = items[anchor]["w"]
-                    i_h = items[anchor]["h"]
-                    i_label = items[anchor]["product_type"]
-
-                    # postive image bounding box
-                    j_x = items[pos]["x"]
-                    j_y = items[pos]["y"]
-                    j_w = items[pos]["w"]
-                    j_h = items[pos]["h"]
-                    j_label = items[pos]["product_type"]
-
                     # sample negative from the same category as positive (but different outfit)
-                    neg_sample = random.choice(data_by_cat[j_label])
+                    neg_sample = random.choice(data_by_cat[items[pos]["product_type"]])
                     while neg_sample["image_signature"] == sig:
-                        neg_sample = random.choice(data_by_cat[j_label])
-
-                    neg_sig = neg_sample["image_signature"]
-                    k_x = neg_sample["x"]
-                    k_y = neg_sample["y"]
-                    k_w = neg_sample["w"]
-                    k_h = neg_sample["h"]
-                    k_label = neg_sample["product_type"]
+                        neg_sample = random.choice(data_by_cat[items[pos]["product_type"]])
 
                     # add triplets
                     triplets.append(
                         {
                             "image_signature_anchor": sig,
-                            "bounding_x_anchor": i_x,
-                            "bounding_y_anchor": i_y,
-                            "bounding_width_anchor": i_w,
-                            "bounding_height_anchor": i_h,
-                            "anchor_product_type": i_label,
+                            "bounding_box_anchor": items[anchor]["bounding_box"],
+                            "anchor_product_type": items[anchor]["product_type"],
                             "image_signature_pos": sig,
-                            "bounding_x_pos": j_x,
-                            "bounding_y_pos": j_y,
-                            "bounding_width_pos": j_w,
-                            "bounding_height_pos": j_h,
-                            "pos_product_type": j_label,
-                            "image_signature_neg": neg_sig,
-                            "bounding_x_neg": k_x,
-                            "bounding_y_neg": k_y,
-                            "bounding_width_neg": k_w,
-                            "bounding_height_neg": k_h,
-                            "neg_product_type": k_label,
+                            "bounding_box_pos": items[pos]["bounding_box"],
+                            "pos_product_type": items[pos]["product_type"],
+                            "image_signature_neg": neg_sample["image_signature"],
+                            "bounding_box_neg": neg_sample["bounding_box"],
+                            "neg_product_type": neg_sample["product_type"],
                         }
                     )
 
                     pairs_from_outfit += 1
 
+                    # print info
                     cnt += 1
                     if cnt % 100000 == 0:
                         print("num_triplets={}".format(cnt))
@@ -181,9 +151,38 @@ class FashionCompleteTheLookDataloader:
         print("Done! Total number triplets : {}".format(cnt))
 
         # convert to dataframe
-        triplets = pd.DataFrame(triplets).drop_duplicates()
+        triplets = pd.DataFrame(triplets)
 
-        return triplets
+        # drop duplicates
+        for bbox in ["bounding_box_anchor", "bounding_box_pos", "bounding_box_neg"]:
+            triplets[f"{bbox}_str"] = triplets[bbox].apply(lambda x: ",".join(map(str, x)))
+
+        triplets = triplets.drop_duplicates(
+            subset=[
+                "image_signature_anchor",
+                "bounding_box_anchor_str",
+                "anchor_product_type",
+                "image_signature_pos",
+                "bounding_box_pos_str",
+                "pos_product_type",
+                "image_signature_neg",
+                "bounding_box_neg_str",
+                "neg_product_type",
+            ]
+        )
+        return triplets[
+            [
+                "image_signature_anchor",
+                "bounding_box_anchor",
+                "anchor_product_type",
+                "image_signature_pos",
+                "bounding_box_pos",
+                "pos_product_type",
+                "image_signature_neg",
+                "bounding_box_neg",
+                "neg_product_type",
+            ]
+        ]
 
     def build_metadata_csv(self):
         """
@@ -209,10 +208,7 @@ class FashionCompleteTheLookDataloader:
         image_meta_df["img_info"] = image_meta_df.apply(
             lambda x: {
                 "image_signature": x["image_signature"],
-                "x": x["x"],
-                "y": x["y"],
-                "w": x["w"],
-                "h": x["h"],
+                "bounding_box": [x["x"], x["y"], x["w"], x["h"]],
                 "product_type": x["product_type"],
             },
             axis=1,
@@ -235,7 +231,9 @@ class FashionCompleteTheLookDataloader:
         # save to csv
         triplets.to_csv(f"{cfg.DATASET_DIR}/dataset_metadata_ctl_triplets.csv", index=False)
 
-        return triplets
+    def data_loader(self):
+        """Dataloader for FashionProductCTLTripletDataset"""
+        pass
 
 
 if __name__ == "__main__":
