@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from PIL import Image
 from src.config import config as cfg
-
+import requests
 
 def bounding_box_process(img, bounding_box):
     """
@@ -28,7 +28,7 @@ def bounding_box_process(img, bounding_box):
 
 def convert_to_url(signature):
     """convert image"""
-    prefix = "http://i.pinimg.com/400x/%s/%s/%s/%s.jpg"
+    prefix = "http://i.pinimg.com/400x/%s/%s/%s/%s"
     return prefix % (signature[0:2], signature[2:4], signature[4:6], signature)
 
 
@@ -40,16 +40,23 @@ def display_recommended_products(im1, im2, im3, im4, im5, im6, simlarity_scores,
     # setting values to rows and column variables
     rows = 2  # 2
     columns = 5  # 2
-
-    # reading images
-    input_image_size = Image.open(f"{cfg.DATASET_DIR}/{im1}").size
-    Image1 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im1}"))
-    Image2 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im2}").resize(input_image_size))
-    Image3 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im3}").resize(input_image_size))
-    Image4 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im4}").resize(input_image_size))
-    Image5 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im5}").resize(input_image_size))
-    Image6 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im6}").resize(input_image_size))
-
+    if(save_image):
+        # reading images
+        input_image_size = Image.open(f"{cfg.DATASET_DIR}/{im1}").size
+        Image1 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im1}"))
+        Image2 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im2}").resize(input_image_size))
+        Image3 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im3}").resize(input_image_size))
+        Image4 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im4}").resize(input_image_size))
+        Image5 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im5}").resize(input_image_size))
+        Image6 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im6}").resize(input_image_size))
+    else:
+        input_image_size = Image.open(requests.get(convert_to_url(im1.split('/')[-1]), stream=True).raw).size
+        Image1 = np.asarray(Image.open(requests.get(convert_to_url(im1.split('/')[-1]), stream=True).raw))
+        Image2 = np.asarray(Image.open(requests.get(convert_to_url(im2.split('/')[-1]), stream=True).raw).resize(input_image_size))
+        Image3 = np.asarray(Image.open(requests.get(convert_to_url(im3.split('/')[-1]), stream=True).raw).resize(input_image_size))
+        Image4 = np.asarray(Image.open(requests.get(convert_to_url(im4.split('/')[-1]), stream=True).raw).resize(input_image_size))
+        Image5 = np.asarray(Image.open(requests.get(convert_to_url(im5.split('/')[-1]), stream=True).raw).resize(input_image_size))
+        Image6 = np.asarray(Image.open(requests.get(convert_to_url(im6.split('/')[-1]), stream=True).raw).resize(input_image_size))
     # Adds a subplot at the 1st position
     fig.add_subplot(rows, columns, 2)
 
