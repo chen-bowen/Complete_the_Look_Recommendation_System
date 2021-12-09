@@ -1,18 +1,18 @@
 import pickle
 
-from config import config as cfg
-from src.dataset.create_dataloader import dataloader
+from src.config import config as cfg
+from src.dataset.Dataloader import FashionProductSTLDataloader
 from src.utils.similarity import calculate_similarity
 
 
-def recommend_similar_products(product_id, top_n=5):
+def recommend_similar_products(product_id, dataset_name="product", top_n=5):
     """takes in the product id and returns the top"""
     # get extracted features
-    with (open(f"{cfg.PACKAGE_ROOT}/features/product_features.pickle", "rb")) as file:
+    with (open(f"{cfg.PACKAGE_ROOT}/features/{dataset_name}_features.pickle", "rb")) as file:
         all_products_features = pickle.load(file)
 
     # get dataset metadata dataframe
-    data_loader = dataloader()
+    data_loader = FashionProductSTLDataloader().data_loader()
     metadata = data_loader.dataset.metadata
 
     # get query feature from product id

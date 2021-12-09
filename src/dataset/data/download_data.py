@@ -1,7 +1,8 @@
 import concurrent.futures
 import json
+import time
 import urllib.request
-from os import makedirs, path
+from os import listdir, makedirs, path
 
 import pandas as pd
 import tqdm
@@ -21,14 +22,19 @@ def download_and_save_image_stl(res, image_category, image_type):
     if not path.exists(f"{image_category}/{image_type}"):
         makedirs(f"{image_category}/{image_type}")
 
-    try:
-        urllib.request.urlretrieve(
-            img_url,
-            f"{image_category}/{image_type}/{res[image_type]}.jpg",
-        )
-    except Exception:
-        print(f"Failed to download image {img_url}")
-        pass
+    remaining_download_tries = 3
+    while remaining_download_tries > 0:
+        try:
+            urllib.request.urlretrieve(
+                img_url,
+                f"{image_category}/{image_type}/{res[image_type]}.jpg",
+            )
+        except Exception:
+            remaining_download_tries -= 1
+            continue
+        else:
+            print(f"Failed to download image {img_url} 3 times")
+            break
 
 
 def get_images_stl(image_category, image_type):
@@ -39,6 +45,11 @@ def get_images_stl(image_category, image_type):
     }
     img_file = open(img_file_map[image_category])
     image_list = img_file.readlines()
+
+    # check for existing images and remove them from the download list
+    existed = [x[:-4] for x in listdir(f"{image_category}/{image_type}")]
+    image_list = [res for res in image_list if res not in existed]
+
     # use thread pooling to speed up processing downloading images
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
         future_to_url = {
@@ -66,38 +77,44 @@ def download_and_save_inages_complete_the_look(res, image_category, image_type):
     if not path.exists(f"{image_category}/{image_type}_single"):
         makedirs(f"{image_category}/{image_type}_single")
 
-    try:
-        # retrieve the cluster product photo and save to train/test
-        urllib.request.urlretrieve(
-            img_url,
-            f"{image_category}/{image_type}/{res['image_signature']}.jpg",
-        )
-        # crop out the single product photo and save to train_single/test_single
-        img = Image.open(f"{image_category}/{image_type}/{res['image_signature']}.jpg")
-
-        for bounding_box, product_type in zip(res["bounding_boxes"], res["product_type"]):
-
-            # convert bounding box to its coordinates
-            img_height, img_width = img.size
-            x, y, w, h = bounding_box
-
-            # get bouding box coordinates
-            x_min = img_width * x
-            y_min = img_height * y
-
-            x_max = x_min + img_width * w
-            y_max = y_min + img_height * h
-
-            # crop and save the images
-            img_single = img.crop([x_min, y_min, x_max, y_max])
-            img_single.save(
-                f"{image_category}/{image_type}_single/{res['image_signature']}_{product_type}.jpg"
+    remaining_download_tries = 3
+    while remaining_download_tries > 0:
+        try:
+            urllib.request.urlretrieve(
+                img_url,
+                f"{image_category}/{image_type}/{res['image_signature']}.jpg",
             )
 
-    except Exception as e:
-        print("error:", e)
-        print(f"Failed to download image {img_url}")
-        pass
+            # crop out the single product photo and save to train_single/test_single
+            img = Image.open(f"{image_category}/{image_type}/{res['image_signature']}.jpg")
+
+            for bounding_box, product_type in zip(res["bounding_boxes"], res["product_type"]):
+
+                # convert bounding box to its coordinates
+                img_height, img_width = img.size
+                x, y, w, h = bounding_box
+
+                # get bouding box coordinates
+                x_min = img_width * x
+                y_min = img_height * y
+
+                x_max = x_min + img_width * w
+                y_max = y_min + img_height * h
+
+                # crop and save the images
+                img_single = img.crop([x_min, y_min, x_max, y_max])
+                img_single.save(
+                    f"{image_category}/{image_type}_single/{res['image_signature']}_{product_type}.jpg"
+                )
+
+        except Exception as e:
+            print(e)
+            remaining_download_tries -= 1
+            time.sleep(0.1)
+            continue
+        else:
+            print(f"Failed to download image {img_url} 3 times")
+            break
 
 
 def get_images_complete_the_look(image_category, image_type):
@@ -115,6 +132,11 @@ def get_images_complete_the_look(image_category, image_type):
         ),
         axis=1,
     )
+    # check for existing images and remove them from the download list
+    existed = [x[:-4] for x in listdir("./fashion_v2/train")]
+    image_meta_df = image_meta_df[~image_meta_df["image_signature"].isin(existed)]
+
+    # convert to list
     image_list = (
         image_meta_df[["image_signature", "bounding_boxes", "product_type"]]
         .groupby(["image_signature"])

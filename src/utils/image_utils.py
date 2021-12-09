@@ -1,16 +1,20 @@
 # import libraries
-from config import config as cfg
+import os
+
+import numpy as np
 from matplotlib import pyplot as plt
+from PIL import Image
+from src.config import config as cfg
 
 
-def bounding_box_process(img, bbox):
+def bounding_box_process(img, bounding_box):
     """
     takes in the image and bounding box information,
     and returns bounding boxes in x_min, y_min, x_max, y_max
     """
     # get image shape and bounding box information
-    img_height, img_width = img.shape()
-    x, y, w, h = bbox
+    img_height, img_width = img.size
+    x, y, w, h = bounding_box
 
     # get bouding box coordinates
     x_min = img_width * x
@@ -19,7 +23,7 @@ def bounding_box_process(img, bbox):
     x_max = x_min + img_width * w
     y_max = y_min + img_height * h
 
-    return x_min, y_min, x_max, y_max
+    return [x_min, y_min, x_max, y_max]
 
 
 def convert_to_url(signature):
@@ -28,7 +32,7 @@ def convert_to_url(signature):
     return prefix % (signature[0:2], signature[2:4], signature[4:6], signature)
 
 
-def display_recommended_products(im1, im2, im3, im4, im5, im6, simlarity_scores):
+def display_recommended_products(im1, im2, im3, im4, im5, im6, simlarity_scores, save_image=True):
 
     # create figure
     fig = plt.figure(figsize=(10, 7))
@@ -38,12 +42,13 @@ def display_recommended_products(im1, im2, im3, im4, im5, im6, simlarity_scores)
     columns = 5  # 2
 
     # reading images
-    Image1 = plt.imread(f"{cfg.DATASET_DIR}/{im1}")
-    Image2 = plt.imread(f"{cfg.DATASET_DIR}/{im2}")
-    Image3 = plt.imread(f"{cfg.DATASET_DIR}/{im3}")
-    Image4 = plt.imread(f"{cfg.DATASET_DIR}/{im4}")
-    Image5 = plt.imread(f"{cfg.DATASET_DIR}/{im5}")
-    Image6 = plt.imread(f"{cfg.DATASET_DIR}/{im6}")
+    input_image_size = Image.open(f"{cfg.DATASET_DIR}/{im1}").size
+    Image1 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im1}"))
+    Image2 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im2}").resize(input_image_size))
+    Image3 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im3}").resize(input_image_size))
+    Image4 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im4}").resize(input_image_size))
+    Image5 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im5}").resize(input_image_size))
+    Image6 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im6}").resize(input_image_size))
 
     # Adds a subplot at the 1st position
     fig.add_subplot(rows, columns, 2)
@@ -93,5 +98,19 @@ def display_recommended_products(im1, im2, im3, im4, im5, im6, simlarity_scores)
     plt.axis("off")
     plt.title(f"Option #5 \n Score: {round(simlarity_scores[4],2)}")
 
-    plt.savefig("2by5.png")
-    plt.show()
+    if save_image:
+        # save all recommendation layout
+        if not os.path.exists(cfg.RETURNED_IMAGE_DIR):
+            os.makedirs(cfg.RETURNED_IMAGE_DIR)
+        plt.savefig(f"{cfg.RETURNED_IMAGE_DIR}/recommendation_all.png")
+
+        # save individual recommendation image
+        input_img = Image.open(f"{cfg.DATASET_DIR}/{im1}")
+        input_img.save(f"{cfg.RETURNED_IMAGE_DIR}/input_product.png")
+
+        for i, im_path in enumerate([im2, im3, im4, im5, im6]):
+            img = Image.open(f"{cfg.DATASET_DIR}/{im_path}").resize(input_img.size)
+            img.save(f"{cfg.RETURNED_IMAGE_DIR}/recommendation_{i+1}.png")
+
+    else:
+        return fig
