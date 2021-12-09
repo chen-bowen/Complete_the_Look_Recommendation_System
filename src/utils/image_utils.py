@@ -7,14 +7,14 @@ from PIL import Image
 from src.config import config as cfg
 
 
-def bounding_box_process(img, bbox):
+def bounding_box_process(img, bounding_box):
     """
     takes in the image and bounding box information,
     and returns bounding boxes in x_min, y_min, x_max, y_max
     """
     # get image shape and bounding box information
-    img_height, img_width = img.shape()
-    x, y, w, h = bbox
+    img_height, img_width = img.size
+    x, y, w, h = bounding_box
 
     # get bouding box coordinates
     x_min = img_width * x
@@ -23,7 +23,7 @@ def bounding_box_process(img, bbox):
     x_max = x_min + img_width * w
     y_max = y_min + img_height * h
 
-    return x_min, y_min, x_max, y_max
+    return [x_min, y_min, x_max, y_max]
 
 
 def convert_to_url(signature):

@@ -129,13 +129,22 @@ class FashionCompleteTheLookDataloader:
                     triplets.append(
                         {
                             "image_signature_anchor": sig,
-                            "bounding_box_anchor": items[anchor]["bounding_box"],
+                            "bounding_box_x_anchor": items[anchor]["x"],
+                            "bounding_box_y_anchor": items[anchor]["y"],
+                            "bounding_box_w_anchor": items[anchor]["w"],
+                            "bounding_box_h_anchor": items[anchor]["h"],
                             "anchor_product_type": items[anchor]["product_type"],
                             "image_signature_pos": sig,
-                            "bounding_box_pos": items[pos]["bounding_box"],
+                            "bounding_box_x_pos": items[pos]["x"],
+                            "bounding_box_y_pos": items[pos]["y"],
+                            "bounding_box_w_pos": items[pos]["w"],
+                            "bounding_box_h_pos": items[pos]["h"],
                             "pos_product_type": items[pos]["product_type"],
                             "image_signature_neg": neg_sample["image_signature"],
-                            "bounding_box_neg": neg_sample["bounding_box"],
+                            "bounding_box_x_neg": neg_sample["x"],
+                            "bounding_box_y_neg": neg_sample["y"],
+                            "bounding_box_w_neg": neg_sample["w"],
+                            "bounding_box_h_neg": neg_sample["h"],
                             "neg_product_type": neg_sample["product_type"],
                         }
                     )
@@ -151,38 +160,9 @@ class FashionCompleteTheLookDataloader:
         print("Done! Total number triplets : {}".format(cnt))
 
         # convert to dataframe
-        triplets = pd.DataFrame(triplets)
+        triplets = pd.DataFrame(triplets).drop_duplicates()
 
-        # drop duplicates
-        for bbox in ["bounding_box_anchor", "bounding_box_pos", "bounding_box_neg"]:
-            triplets[f"{bbox}_str"] = triplets[bbox].apply(lambda x: ",".join(map(str, x)))
-
-        triplets = triplets.drop_duplicates(
-            subset=[
-                "image_signature_anchor",
-                "bounding_box_anchor_str",
-                "anchor_product_type",
-                "image_signature_pos",
-                "bounding_box_pos_str",
-                "pos_product_type",
-                "image_signature_neg",
-                "bounding_box_neg_str",
-                "neg_product_type",
-            ]
-        )
-        return triplets[
-            [
-                "image_signature_anchor",
-                "bounding_box_anchor",
-                "anchor_product_type",
-                "image_signature_pos",
-                "bounding_box_pos",
-                "pos_product_type",
-                "image_signature_neg",
-                "bounding_box_neg",
-                "neg_product_type",
-            ]
-        ]
+        return triplets
 
     def build_metadata_csv(self):
         """
@@ -190,7 +170,7 @@ class FashionCompleteTheLookDataloader:
         metadata includes a triplet of anchor, postive and negative image
         """
         # if the file exists, skip
-        if os.path.exists(f"{cfg.DATASET_DIR}/dataset_metadata_ctl.csv"):
+        if os.path.exists(f"{cfg.DATASET_DIR}/dataset_metadata_ctl_triplets.csv"):
             return
 
         img_file_map = {
@@ -208,7 +188,10 @@ class FashionCompleteTheLookDataloader:
         image_meta_df["img_info"] = image_meta_df.apply(
             lambda x: {
                 "image_signature": x["image_signature"],
-                "bounding_box": [x["x"], x["y"], x["w"], x["h"]],
+                "x": x["x"],
+                "y": x["y"],
+                "w": x["w"],
+                "h": x["h"],
                 "product_type": x["product_type"],
             },
             axis=1,
@@ -233,9 +216,25 @@ class FashionCompleteTheLookDataloader:
 
     def data_loader(self):
         """Dataloader for FashionProductCTLTripletDataset"""
-        pass
+        # define transformations
+        transformations = transforms.Compose(
+            [
+                transforms.Resize((cfg.HEIGHT, cfg.WIDTH)),
+                transforms.ToTensor(),
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+            ]
+        )
+
+        # create the dataset and the stl_dataloader
+        dataset = FashionProductCTLTripletDataset(
+            cfg.RAW_DATA_FOLDER,
+            f"{cfg.DATASET_DIR}/dataset_metadata_ctl_triplets.csv",
+            transform=transformations,
+        )
+        breakpoint()
+        return DataLoader(dataset, batch_size=cfg.BATCH_SIZE, shuffle=False, num_workers=0)
 
 
 if __name__ == "__main__":
     # dl = FashionProductSTLDataloader().data_loader()
-    dl2 = FashionCompleteTheLookDataloader()
+    dl2 = FashionCompleteTheLookDataloader().data_loader()
