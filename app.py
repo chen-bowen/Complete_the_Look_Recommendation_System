@@ -1,6 +1,6 @@
 import streamlit as st
 
-from src.models.recommend import recommend_similar_products
+from src.recommend import recommend_similar_products
 from src.utils.image_utils import display_recommended_products
 
 
@@ -24,6 +24,6 @@ def handle_input(input: int):
 product_id_input = st.number_input("Product ID", min_value=0, max_value=38109, value=5559)
 submit_btn = st.button("Submit")
 if submit_btn:
-    fig = handle_input(heproduct_id_inputllo)
+    fig = handle_input(product_id_input)
     with st.container():
         st.pyplot(fig)
