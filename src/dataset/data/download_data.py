@@ -32,7 +32,7 @@ def download_and_save_image_stl(res, image_category, image_type):
 def get_images_stl(image_category, image_type):
     """Get images from STL dataset given category (fashion/home) and type (scene/product)"""
     img_file_map = {
-        "fashion": "./STL-Dataset/fashion.json",
+        "fashion": "dataset/data/STL-Dataset/fashion.json",
         "home": "./STL-Dataset/home.json",
     }
     img_file = open(img_file_map[image_category])
@@ -153,5 +153,5 @@ def get_images_complete_the_look(image_category, image_type):
 
 
 if __name__ == "__main__":
-    # get_images_stl("fashion", "product")
-    get_images_complete_the_look("fashion_v2", "train")
+    get_images_stl("fashion", "product")
+    # get_images_complete_the_look("fashion_v2", "train")

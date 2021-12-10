@@ -24,7 +24,7 @@ def recommend_similar_products(product_id, dataset_name="product", top_n=5):
 
     # get query product category and filter the prpduct catelog for the same category
     product_category = product_metadata["product_type"]
-    metadata["similarity_score"] = simlarity_score
+    metadata["similarity_score"] = simlarity_score.cpu()
 
     # get top 5 products metadata
     recommended_products_metadata = (
