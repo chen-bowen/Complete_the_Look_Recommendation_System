@@ -9,10 +9,11 @@ from src.utils.model_utils import init_weights
 from tqdm import tqdm
 
 
-def train_compatibility_model(num_epochs=2, batch_size=16):
+def train_compatibility_model(num_epochs=10, batch_size=32):
     """train compatibility model with the triplets data"""
+    
     model = CompatibilityModel()
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     train_dataloader = FashionCompleteTheLookDataloader(batch_size=batch_size).data_loader()
 
     # freeze the base model part of the compatibility model
@@ -24,9 +25,12 @@ def train_compatibility_model(num_epochs=2, batch_size=16):
     model.apply(init_weights)
     model.train()
 
-    # compile the model, define loss and optimizer using JIT
-    model = model.to(device)
+
+    # # compile the model, define loss and optimizer using JIT
+    # model = torch.jit.script(model).to(cfg.device)
+    model = model.to(cfg.device)
     optimizer = optim.Adam(model.parameters(), lr=0.005)
+    # criterion = torch.jit.script(TripletLoss())
     criterion = TripletLoss()
 
     # training loop
@@ -37,10 +41,11 @@ def train_compatibility_model(num_epochs=2, batch_size=16):
             tqdm(train_dataloader, desc="Training", leave=False)
         ):
             # send triplets to device
-            anchor = anchor.to(device)
-            positive = positive.to(device)
-            negative = negative.to(device)
-
+            
+            anchor = anchor.to(cfg.device)
+            positive = positive.to(cfg.device)
+            negative = negative.to(cfg.device)
+            breakpoint()
             # forward pass through the model and obtain features for the triplets
             anchor_features = model(anchor)
             positive_features = model(positive)

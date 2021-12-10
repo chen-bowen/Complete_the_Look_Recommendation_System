@@ -102,10 +102,10 @@ def download_and_save_inages_complete_the_look(res, image_category, image_type):
 
 def get_images_complete_the_look(image_category, image_type):
     img_file_map = {
-        "train": "./complete-the-look-dataset/datasets/raw_train.tsv",
-        "test": "./complete-the-look-dataset/datasets/raw_test.tsv",
-        "triplet_train_1": "./complete-the-look-dataset/datasets/triplet_train_p1.tsv",
-        "triplet_train_2": "./complete-the-look-dataset/datasets/triplet_train_p2.tsv",
+        "train": "dataset/data/complete-the-look-dataset/datasets/raw_train.tsv",
+        "test": "dataset/data/complete-the-look-dataset/datasets/raw_test.tsv",
+        "triplet_train_1": "dataset/data/complete-the-look-dataset/datasets/triplet_train_p1.tsv",
+        "triplet_train_2": "dataset/data/complete-the-look-dataset/datasets/triplet_train_p2.tsv",
     }
     # set up directory structure
     if not path.exists(f"{image_category}/{image_type}"):
@@ -153,5 +153,5 @@ def get_images_complete_the_look(image_category, image_type):
 
 
 if __name__ == "__main__":
-    get_images_stl("fashion", "product")
-    # get_images_complete_the_look("fashion_v2", "train")
+    # get_images_stl("fashion", "product")
+    get_images_complete_the_look("fashion_v2", "train")
