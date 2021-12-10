@@ -15,9 +15,9 @@ class StyleEmbedding:
     Feature extractor that generates different features according to data_loader and task
     """
 
-    def __init__(self, data_loader, dataset_name):
+    def __init__(self, data_loader, task_name):
         self.data_loader = data_loader
-        self.dataset_name = dataset_name
+        self.task_name = task_name
 
     def similar_product_embedding(self):
         """
@@ -44,14 +44,12 @@ class StyleEmbedding:
         all_features = torch.cat(all_features)
 
         # save all features to a pickle file
-        with open(
-            f"{cfg.PACKAGE_ROOT}/features/{self.dataset_name}_features.pickle", "wb"
-        ) as handle:
+        with open(f"{cfg.PACKAGE_ROOT}/features/{self.task_name}_embedding.pickle", "wb") as handle:
             pickle.dump(all_features, handle, protocol=pickle.HIGHEST_PROTOCOL)
         return all_features
 
 
 if __name__ == "__main__":
     StyleEmbedding(
-        data_loader=FashionProductSTLDataloader().data_loader(), dataset_name="product"
+        data_loader=FashionProductSTLDataloader().data_loader(), task_name="similar_product"
     ).similar_product_embedding()
