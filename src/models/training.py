@@ -25,6 +25,7 @@ def train_compatibility_model(num_epochs=10, batch_size=32):
     model.apply(init_weights)
     model.train()
 
+
     # # compile the model, define loss and optimizer using JIT
     # model = torch.jit.script(model).to(cfg.device)
     model = model.to(cfg.device)
