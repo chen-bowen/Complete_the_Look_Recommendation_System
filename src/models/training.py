@@ -9,11 +9,11 @@ from src.utils.model_utils import init_weights
 from tqdm import tqdm
 
 
-def train_compatibility_model(num_epochs=30):
+def train_compatibility_model(num_epochs=10, batch_size=32):
     """train compatibility model with the triplets data"""
     model = CompatibilityModel()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    train_dataloader = FashionCompleteTheLookDataloader(batch_size=cfg.BATCH_SIZE).data_loader()
+    train_dataloader = FashionCompleteTheLookDataloader(batch_size=batch_size).data_loader()
 
     # freeze the base model part of the compatibility model
     for name, param in model.named_parameters():
@@ -59,8 +59,8 @@ def train_compatibility_model(num_epochs=30):
             # append batch loss to epoch loss
             loss_epoch.append(loss.cpu().detach().numpy())
 
-            # print training loss progress
-            print("Epoch: {}/{} - Loss: {:.4f}".format(epoch + 1, num_epochs, np.mean(loss_epoch)))
+        # print training loss progress
+        print("Epoch: {}/{} - Loss: {:.4f}".format(epoch + 1, num_epochs, np.mean(loss_epoch)))
 
     # save the trained model to the models directory
     torch.save(
