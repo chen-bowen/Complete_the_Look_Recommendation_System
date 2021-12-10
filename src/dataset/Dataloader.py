@@ -88,8 +88,10 @@ SKIP_IF_POS_SAME_CATEGORY_AS_ANCHOR = (
 
 
 class FashionCompleteTheLookDataloader:
-    def __init__(self, image_type="train"):
+    def __init__(self, image_type="train", batch_size=cfg.BATCH_SIZE, num_workers=0):
         self.image_type = image_type
+        self.batch_size = batch_size
+        self.num_workers = num_workers
         self.build_metadata_csv()
 
     @staticmethod
@@ -231,7 +233,9 @@ class FashionCompleteTheLookDataloader:
             f"{cfg.DATASET_DIR}/dataset_metadata_ctl_triplets.csv",
             transform=transformations,
         )
-        return DataLoader(dataset, batch_size=cfg.BATCH_SIZE, shuffle=False, num_workers=0)
+        return DataLoader(
+            dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers
+        )
 
 
 if __name__ == "__main__":

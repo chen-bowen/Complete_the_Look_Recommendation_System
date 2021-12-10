@@ -5,10 +5,10 @@ from src.dataset.Dataloader import FashionProductSTLDataloader
 from src.utils.similarity import calculate_similarity
 
 
-def recommend_similar_products(product_id, dataset_name="product", top_n=5):
+def recommend_similar_products(product_id, task_name="similar_product", top_n=5):
     """takes in the product id and returns the top"""
     # get extracted features
-    with (open(f"{cfg.PACKAGE_ROOT}/features/{dataset_name}_features.pickle", "rb")) as file:
+    with (open(f"{cfg.PACKAGE_ROOT}/features/{task_name}_embedding.pickle", "rb")) as file:
         all_products_features = pickle.load(file)
 
     # get dataset metadata dataframe
@@ -39,6 +39,10 @@ def recommend_similar_products(product_id, dataset_name="product", top_n=5):
         "input_product": product_metadata,
         "recommended_products": recommended_products_metadata,
     }
+
+
+def recommend_complementary_products(product_id, task_name="compatible_product", top_n=5):
+    pass
 
 
 if __name__ == "__main__":
