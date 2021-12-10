@@ -28,7 +28,9 @@ class StyleEmbedding:
         data_loader = self.data_loader
 
         # get pretrain model and remove the classification layer
-        resnet = models.resnet18(pretrained=True)
+        # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        print("You are using device: %s" % cfg.device)
+        resnet = models.resnet18(pretrained=True).to(cfg.device)
         resnet.fc = nn.Identity()
         resnet.eval()
         transforms = torchvision.transforms.Resize(256)
@@ -36,12 +38,12 @@ class StyleEmbedding:
 
         for batch in tqdm.tqdm(data_loader):
             X = transforms(batch)  # resizes to 256 X 256 for ResNet
-            X = X.float()
+            X = X.float().to(cfg.device)
             with torch.no_grad():
                 batch_features = resnet(X)
                 all_features.append(batch_features)
 
-        all_features = torch.cat(all_features)
+        all_features = torch.cat(all_features).to(cfg.device)
 
         # save all features to a pickle file
         with open(f"{cfg.PACKAGE_ROOT}/features/{self.task_name}_embedding.pickle", "wb") as handle:
