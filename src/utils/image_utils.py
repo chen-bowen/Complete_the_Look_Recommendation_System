@@ -118,6 +118,6 @@ def display_recommended_products(im1, im2, im3, im4, im5, im6, simlarity_scores,
         for i, im_path in enumerate([im2, im3, im4, im5, im6]):
             img = Image.open(f"{cfg.DATASET_DIR}/{im_path}").resize(input_img.size)
             img.save(f"{cfg.RETURNED_IMAGE_DIR}/recommendation_{i+1}.png")
-
+    # return figure if save image is false
     else:
         return fig
