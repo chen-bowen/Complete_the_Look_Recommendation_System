@@ -5,7 +5,7 @@ from torchvision import models
 class CompatibilityModel(nn.Module):
     """Custom model to measure compatibility between fashion products"""
 
-    def __init__(self, hidden_dim=256, emb_dim=128):
+    def __init__(self, hidden_dim=256, emb_dim=128, dropout=0.4):
         super(CompatibilityModel, self).__init__()
         # use resnet34 as base model
         self.base_model = models.resnet18(pretrained=True)
@@ -13,8 +13,8 @@ class CompatibilityModel(nn.Module):
         # add 2 layers on top of base model
         self.embedding_layers = nn.Sequential(
             nn.Linear(1000, hidden_dim),
-            # nn.BatchNorm1d(num_features=batch_norm_features),
-            nn.LeakyReLU(),
+            nn.Dropout(dropout),
+            nn.ReLU(),
             nn.Linear(hidden_dim, emb_dim),
         )
 

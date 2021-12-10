@@ -9,7 +9,7 @@ from src.utils.model_utils import init_weights
 from tqdm import tqdm
 
 
-def train_compatibility_model(num_epochs=10, batch_size=32):
+def train_compatibility_model(num_epochs=2, batch_size=16):
     """train compatibility model with the triplets data"""
     model = CompatibilityModel()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -26,7 +26,7 @@ def train_compatibility_model(num_epochs=10, batch_size=32):
 
     # compile the model, define loss and optimizer using JIT
     model = torch.jit.script(model).to(device)
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    optimizer = optim.Adam(model.parameters(), lr=0.005)
     criterion = torch.jit.script(TripletLoss())
 
     # training loop
