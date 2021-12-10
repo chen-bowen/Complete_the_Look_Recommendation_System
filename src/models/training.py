@@ -25,9 +25,9 @@ def train_compatibility_model(num_epochs=2, batch_size=16):
     model.train()
 
     # compile the model, define loss and optimizer using JIT
-    model = model.to(device)
+    model = torch.jit.script(model).to(device)
     optimizer = optim.Adam(model.parameters(), lr=0.005)
-    criterion = TripletLoss()
+    criterion = torch.jit.script(TripletLoss())
 
     # training loop
     for epoch in tqdm(range(num_epochs), desc="Epochs"):
@@ -51,7 +51,7 @@ def train_compatibility_model(num_epochs=2, batch_size=16):
 
             # calculate loss and backward pass through the model
             loss = criterion(anchor_features, positive_features, negative_features)
-            loss.backward()
+            loss.backward(inputs=tuple(model.embedding_layers.parameters()), retain_graph=True)
 
             # update the weights
             optimizer.step()
