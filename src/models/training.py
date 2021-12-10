@@ -25,9 +25,9 @@ def train_compatibility_model(num_epochs=2, batch_size=16):
     model.train()
 
     # compile the model, define loss and optimizer using JIT
-    model = torch.jit.script(model).to(device)
+    model = model.to(device)
     optimizer = optim.Adam(model.parameters(), lr=0.005)
-    criterion = torch.jit.script(TripletLoss())
+    criterion = TripletLoss()
 
     # training loop
     for epoch in tqdm(range(num_epochs), desc="Epochs"):

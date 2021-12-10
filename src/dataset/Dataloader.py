@@ -88,7 +88,7 @@ SKIP_IF_POS_SAME_CATEGORY_AS_ANCHOR = (
 
 
 class FashionCompleteTheLookDataloader:
-    def __init__(self, image_type="train", batch_size=cfg.BATCH_SIZE, num_workers=5):
+    def __init__(self, image_type="train", batch_size=cfg.BATCH_SIZE, num_workers=8):
         self.image_type = image_type
         self.batch_size = batch_size
         self.num_workers = num_workers
@@ -185,6 +185,13 @@ class FashionCompleteTheLookDataloader:
             img_file_map[self.image_type], sep="\t", header=None, skiprows=1
         )
         image_meta_df.columns = "image_signature x  y  w  h product_type".split()
+
+        # filter the image metadata df to contain only images that existed
+        existing_images_name = [
+            filename.split(".")[0]
+            for filename in os.listdir(f"{cfg.DATASET_DIR}/data/fashion_v2/train")
+        ]
+        image_meta_df = image_meta_df[image_meta_df["image_signature"].isin(existing_images_name)]
 
         # group by image signature and product type
         image_meta_df["img_info"] = image_meta_df.apply(
