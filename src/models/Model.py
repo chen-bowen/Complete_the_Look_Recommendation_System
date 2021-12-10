@@ -12,7 +12,7 @@ class CompatibilityModel(nn.Module):
 
         # add 2 layers on top of base model
         self.embedding_layers = nn.Sequential(
-            nn.Linear(512, hidden_dim),
+            nn.Linear(1000, hidden_dim),
             nn.BatchNorm2d(num_features=batch_norm_features),
             nn.LeakyReLU(),
             nn.Linear(hidden_dim, emb_dim),
@@ -20,6 +20,6 @@ class CompatibilityModel(nn.Module):
 
     def forward(self, x):
         x = self.base_model(x)
-        x = x.view(-1, 512)
+        x = x.view(-1, 1000)
         x = self.embedding_layers(x)
         return x

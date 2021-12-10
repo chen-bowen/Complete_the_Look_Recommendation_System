@@ -1,3 +1,13 @@
+import torch.nn as nn
+
+
+def init_weights(m):
+    """Apply Xavier initialization on linear layer weights"""
+    if isinstance(m, nn.Linear):
+        nn.init.xavier_uniform(m.weight)
+        m.bias.data.fill_(0.01)
+
+
 class AverageMeter(object):
     """Computes and stores the average and current value"""
 
