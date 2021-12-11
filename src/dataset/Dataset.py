@@ -51,22 +51,18 @@ class FashionProductCTLTripletDataset(Dataset):
         # get the anchor, postive and negative image and save to img triplets
         img_triplets = []
         for img_type in ["anchor", "pos", "neg"]:
-            img_src = Image.open(
+            img = Image.open(
                 os.path.join(
                     cfg.PACKAGE_ROOT,
                     "dataset/data/fashion_v2/",
-                    self.data_type,
-                    self.metadata.loc[triplet_id, f"image_signature_{img_type}"] + ".jpg",
+                    f"{self.data_type}_single",
+                    self.metadata.loc[triplet_id, f"image_signature_{img_type}"]
+                    + "_"
+                    + self.metadata.loc[triplet_id, f"{img_type}_product_type"]
+                    + ".jpg",
                 )
             ).convert("RGB")
-            img_boundingbox = bounding_box_process(
-                img_src,
-                [
-                    self.metadata.loc[triplet_id, f"bounding_box_{cord}_{img_type}"]
-                    for cord in ["x", "y", "w", "h"]
-                ],
-            )
-            img = img_src.crop(img_boundingbox)
+
             img_triplets.append(img)
 
         if self.transform is not None:
