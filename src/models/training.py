@@ -37,19 +37,18 @@ def train_compatibility_model(num_epochs=2, batch_size=32):
 
     # training loop
     for epoch in tqdm(range(num_epochs), desc="Epochs"):
-        loss_epoch = 0
 
-        for anchor, positive, negative in tqdm(train_dataloader, desc="Training", leave=False):
-
-            # zero out the accumulated gradients
-            for param in model.parameters():
-                param.grad = None
+        loss_epoch = []
+        print(cfg.device)
+        for i, (anchor, positive, negative) in enumerate(
+            tqdm(train_dataloader, desc="Training", leave=False)
+        ):
+            # send triplets to device
 
             # send triplets to device
             anchor = anchor.to(cfg.device)
             positive = positive.to(cfg.device)
             negative = negative.to(cfg.device)
-
             # forward pass through the model and obtain features for the triplets
 
             anchor_features = model(anchor)
