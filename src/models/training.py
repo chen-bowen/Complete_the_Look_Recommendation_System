@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 def train_compatibility_model(num_epochs=10, batch_size=32):
     """train compatibility model with the triplets data"""
-    
+
     model = CompatibilityModel()
     # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     train_dataloader = FashionCompleteTheLookDataloader(batch_size=batch_size).data_loader()
@@ -24,7 +24,6 @@ def train_compatibility_model(num_epochs=10, batch_size=32):
     # initialize weights
     model.apply(init_weights)
     model.train()
-
 
     # # compile the model, define loss and optimizer using JIT
     # model = torch.jit.script(model).to(cfg.device)
@@ -41,11 +40,11 @@ def train_compatibility_model(num_epochs=10, batch_size=32):
             tqdm(train_dataloader, desc="Training", leave=False)
         ):
             # send triplets to device
-            
+
             anchor = anchor.to(cfg.device)
             positive = positive.to(cfg.device)
             negative = negative.to(cfg.device)
-            breakpoint()
+
             # forward pass through the model and obtain features for the triplets
             anchor_features = model(anchor)
             positive_features = model(positive)
@@ -56,7 +55,7 @@ def train_compatibility_model(num_epochs=10, batch_size=32):
 
             # calculate loss and backward pass through the model
             loss = criterion(anchor_features, positive_features, negative_features)
-            loss.backward()
+            loss.backward(inputs=tuple(model.embedding_layers.parameters()), retain_graph=True)
 
             # update the weights
             optimizer.step()
