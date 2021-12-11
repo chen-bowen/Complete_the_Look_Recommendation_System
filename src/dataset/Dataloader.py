@@ -78,7 +78,9 @@ class FashionProductSTLDataloader:
             transform=transformations,
             subset="product",
         )
-        return DataLoader(dataset, batch_size=cfg.BATCH_SIZE, shuffle=False, num_workers=0)
+        return DataLoader(
+            dataset, batch_size=cfg.BATCH_SIZE, shuffle=False, num_workers=10, pin_memory=True
+        )
 
 
 MAX_TRIPLETS_PER_OUTFIT = None  # maximum number of triplets sampled from a single outfit
@@ -88,8 +90,11 @@ SKIP_IF_POS_SAME_CATEGORY_AS_ANCHOR = (
 
 
 class FashionCompleteTheLookDataloader:
-    def __init__(self, image_type="train"):
+    def __init__(self, image_type="train", batch_size=cfg.BATCH_SIZE, num_workers=10):
+
         self.image_type = image_type
+        self.batch_size = batch_size
+        self.num_workers = num_workers
         self.build_metadata_csv()
 
     @staticmethod
@@ -184,6 +189,13 @@ class FashionCompleteTheLookDataloader:
         )
         image_meta_df.columns = "image_signature x  y  w  h product_type".split()
 
+        # filter the image metadata df to contain only images that existed
+        existing_images_name = [
+            filename.split(".")[0]
+            for filename in os.listdir(f"{cfg.DATASET_DIR}/data/fashion_v2/train")
+        ]
+        image_meta_df = image_meta_df[image_meta_df["image_signature"].isin(existing_images_name)]
+
         # group by image signature and product type
         image_meta_df["img_info"] = image_meta_df.apply(
             lambda x: {
@@ -231,7 +243,13 @@ class FashionCompleteTheLookDataloader:
             f"{cfg.DATASET_DIR}/dataset_metadata_ctl_triplets.csv",
             transform=transformations,
         )
-        return DataLoader(dataset, batch_size=cfg.BATCH_SIZE, shuffle=False, num_workers=0)
+        return DataLoader(
+            dataset,
+            batch_size=self.batch_size,
+            shuffle=True,
+            num_workers=self.num_workers,
+            pin_memory=True,
+        )
 
 
 if __name__ == "__main__":
