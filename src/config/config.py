@@ -1,6 +1,7 @@
 import pathlib
-import torch
+
 import src
+import torch
 
 PACKAGE_ROOT = pathlib.Path(src.__file__).resolve().parent
 
@@ -13,4 +14,4 @@ RETURNED_IMAGE_DIR = PACKAGE_ROOT / "images"
 TRAINED_MODEL_DIR = PACKAGE_ROOT / "models"
 HEIGHT = 56
 WIDTH = 56
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
