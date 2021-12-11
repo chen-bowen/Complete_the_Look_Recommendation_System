@@ -45,7 +45,7 @@ def train_compatibility_model(num_epochs=10, batch_size=32):
             anchor = anchor.to(cfg.device)
             positive = positive.to(cfg.device)
             negative = negative.to(cfg.device)
-            breakpoint()
+            
             # forward pass through the model and obtain features for the triplets
             anchor_features = model(anchor)
             positive_features = model(positive)
