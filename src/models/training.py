@@ -15,10 +15,13 @@ torch.autograd.profiler.emit_nvtx(False)
 
 
 def train_compatibility_model(num_epochs=2, batch_size=32):
-    """train compatibility model with the triplets data"""
 
+    """train compatibility model with the triplets data"""
     model = CompatibilityModel()
-    train_dataloader = FashionCompleteTheLookDataloader(batch_size=batch_size).data_loader()
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    train_dataloader = FashionCompleteTheLookDataloader(batch_size=batch_size).triplet_data_loader()
+
 
     # freeze the base model part of the compatibility model
     for name, param in model.named_parameters():
@@ -30,10 +33,11 @@ def train_compatibility_model(num_epochs=2, batch_size=32):
     model.train()
 
     # compile the model, define loss and optimizer using JIT
-    model = model.to(cfg.device)
+
+    model = torch.jit.script(model).to(device)
     optimizer = optim.Adam(model.parameters(), lr=0.005)
-    criterion = TripletLoss()
-    print("You are using device: " + str(cfg.device))
+    criterion = torch.jit.script(TripletLoss())
+
 
     # training loop
     for epoch in tqdm(range(num_epochs), desc="Epochs"):
@@ -45,10 +49,11 @@ def train_compatibility_model(num_epochs=2, batch_size=32):
         ):
             # send triplets to device
 
-            # send triplets to device
-            anchor = anchor.to(cfg.device)
-            positive = positive.to(cfg.device)
-            negative = negative.to(cfg.device)
+            anchor = anchor.to(device)
+            positive = positive.to(device)
+            negative = negative.to(device)
+
+
             # forward pass through the model and obtain features for the triplets
 
             anchor_features = model(anchor)
@@ -63,7 +68,9 @@ def train_compatibility_model(num_epochs=2, batch_size=32):
             optimizer.step()
 
             # append batch loss to epoch loss
-            loss_epoch += loss.cpu().detach().numpy()
+
+            if i % 1000 == 0:
+                loss_epoch.append(loss.cpu().detach().numpy())
 
         # print training loss progress
         print("Epoch: {}/{} - Loss: {:.4f}".format(epoch + 1, num_epochs, np.mean(loss_epoch)))

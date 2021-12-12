@@ -8,7 +8,9 @@ from src.utils.similarity import calculate_similarity
 def recommend_similar_products(product_id, task_name="similar_product", top_n=5):
     """takes in the product id and returns the top"""
     # get extracted features
-    with (open(f"{cfg.PACKAGE_ROOT}/features/{task_name}_embedding.pickle", "rb")) as file:
+    with (
+        open(f"{cfg.PACKAGE_ROOT}/features/cached_embeddings/{task_name}_embedding.pickle", "rb")
+    ) as file:
         all_products_features = pickle.load(file)
 
     # get dataset metadata dataframe
