@@ -85,6 +85,7 @@ class FashionProductSTLDataloader:
         return DataLoader(dataset, batch_size=cfg.BATCH_SIZE, shuffle=False, num_workers=5)
 
 
+
 MAX_TRIPLETS_PER_OUTFIT = None  # maximum number of triplets sampled from a single outfit
 SKIP_IF_POS_SAME_CATEGORY_AS_ANCHOR = (
     True  # whether or not anchor and pos/neg must be from different categories
@@ -92,7 +93,9 @@ SKIP_IF_POS_SAME_CATEGORY_AS_ANCHOR = (
 
 
 class FashionCompleteTheLookDataloader:
+
     def __init__(self, image_type="train", batch_size=cfg.BATCH_SIZE, num_workers=8):
+
         self.image_type = image_type
         self.batch_size = batch_size
         self.num_workers = num_workers
@@ -292,7 +295,9 @@ class FashionCompleteTheLookDataloader:
         return DataLoader(
             dataset,
             batch_size=self.batch_size,
+
             shuffle=False,
+
             num_workers=self.num_workers,
             pin_memory=True,
         )

@@ -49,14 +49,15 @@ def recommend_complementary_products(product_id, task_name="compatible_product",
 
 if __name__ == "__main__":
     import random
+    product_id=random.randint(1, 38000)
+    recommendations = recommend_similar_products(product_id)
 
-    recommendations = recommend_similar_products(product_id=random.randint(1, 38000))
-
-    from utils.image_utils import display_recommended_products
+    from utils.image_utils import display_recommended_products, display_recommended_products_one_row
 
     print(recommendations)
-    display_recommended_products(
+    display_recommended_products_one_row(
         recommendations["input_product"]["image_path"],
         *[rec["image_path"] for rec in recommendations["recommended_products"]],
         [round(rec["similarity_score"], 3) for rec in recommendations["recommended_products"]],
+        product_id
     )

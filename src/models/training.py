@@ -6,14 +6,22 @@ from src.dataset.Dataloader import FashionCompleteTheLookDataloader
 from src.losses.loss_function import TripletLoss
 from src.models.Model import CompatibilityModel
 from src.utils.model_utils import init_weights
+from torch.cuda.amp import GradScaler, autocast
 from tqdm import tqdm
 
+torch.autograd.set_detect_anomaly(False)
+torch.autograd.profiler.profile(False)
+torch.autograd.profiler.emit_nvtx(False)
 
-def train_compatibility_model(num_epochs=2, batch_size=16):
+
+def train_compatibility_model(num_epochs=2, batch_size=32):
+
     """train compatibility model with the triplets data"""
     model = CompatibilityModel()
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     train_dataloader = FashionCompleteTheLookDataloader(batch_size=batch_size).triplet_data_loader()
+
 
     # freeze the base model part of the compatibility model
     for name, param in model.named_parameters():
@@ -25,29 +33,32 @@ def train_compatibility_model(num_epochs=2, batch_size=16):
     model.train()
 
     # compile the model, define loss and optimizer using JIT
+
     model = torch.jit.script(model).to(device)
     optimizer = optim.Adam(model.parameters(), lr=0.005)
     criterion = torch.jit.script(TripletLoss())
 
+
     # training loop
     for epoch in tqdm(range(num_epochs), desc="Epochs"):
-        loss_epoch = []
 
+        loss_epoch = []
+        print(cfg.device)
         for i, (anchor, positive, negative) in enumerate(
             tqdm(train_dataloader, desc="Training", leave=False)
         ):
             # send triplets to device
+
             anchor = anchor.to(device)
             positive = positive.to(device)
             negative = negative.to(device)
 
+
             # forward pass through the model and obtain features for the triplets
+
             anchor_features = model(anchor)
             positive_features = model(positive)
             negative_features = model(negative)
-
-            # zero out the accumulated gradients
-            optimizer.zero_grad()
 
             # calculate loss and backward pass through the model
             loss = criterion(anchor_features, positive_features, negative_features)
@@ -57,6 +68,7 @@ def train_compatibility_model(num_epochs=2, batch_size=16):
             optimizer.step()
 
             # append batch loss to epoch loss
+
             if i % 1000 == 0:
                 loss_epoch.append(loss.cpu().detach().numpy())
 
@@ -74,4 +86,4 @@ def train_compatibility_model(num_epochs=2, batch_size=16):
 
 
 if __name__ == "__main__":
-    train_compatibility_model()
+    train_compatibility_model(batch_size=cfg.BATCH_SIZE)
