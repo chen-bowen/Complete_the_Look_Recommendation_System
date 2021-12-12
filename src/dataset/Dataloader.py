@@ -25,7 +25,7 @@ class FashionProductSTLDataloader:
         "product_id", "image_path", "product_type", "image_url", "image_type"
         """
         # if the file exists, skip
-        if os.path.exists(f"{cfg.DATASET_DIR}/dataset_metadata_stl.csv"):
+        if os.path.exists(f"{cfg.DATASET_DIR}/metadata/dataset_metadata_stl.csv"):
             return
 
         images_df = []
@@ -62,7 +62,7 @@ class FashionProductSTLDataloader:
         images_df.columns = ["product_id", "image_path", "product_type", "image_url", "image_type"]
 
         # save to csv
-        images_df.to_csv(f"{cfg.DATASET_DIR}/dataset_metadata_stl.csv", index=False)
+        images_df.to_csv(f"{cfg.DATASET_DIR}/metadata/dataset_metadata_stl.csv", index=False)
 
     def data_loader(self):
         """Dataloader for FashionProductSTLDataset"""
@@ -78,7 +78,7 @@ class FashionProductSTLDataloader:
         # create the dataset and the stl_dataloader
         dataset = FashionProductSTLDataset(
             cfg.RAW_DATA_FOLDER,
-            f"{cfg.DATASET_DIR}/dataset_metadata_stl.csv",
+            f"{cfg.DATASET_DIR}/metadata/dataset_metadata_stl.csv",
             transform=transformations,
             subset="product",
         )
@@ -184,8 +184,8 @@ class FashionCompleteTheLookDataloader:
         """
         # if the file exists, skip
         if os.path.exists(
-            f"{cfg.DATASET_DIR}/dataset_metadata_ctl_triplets.csv"
-        ) and os.path.exists(f"{cfg.DATASET_DIR}/dataset_metadata_ctl_single.csv"):
+            f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_triplets.csv"
+        ) and os.path.exists(f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_single.csv"):
             return
 
         # read csv metadata file
@@ -201,7 +201,7 @@ class FashionCompleteTheLookDataloader:
         ]
         image_meta_df = image_meta_df[image_meta_df["image_signature"].isin(existing_images_name)]
 
-        if not os.path.exists(f"{cfg.DATASET_DIR}/dataset_metadata_ctl_triplets.csv"):
+        if not os.path.exists(f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_triplets.csv"):
             # group by image signature and product type
             image_meta_df["img_info"] = image_meta_df.apply(
                 lambda x: {
@@ -230,9 +230,11 @@ class FashionCompleteTheLookDataloader:
             triplets = self.sample_triplets(image_meta_by_signature, image_meta_by_product_type)
 
             # save to csv
-            triplets.to_csv(f"{cfg.DATASET_DIR}/dataset_metadata_ctl_triplets.csv", index=False)
+            triplets.to_csv(
+                f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_triplets.csv", index=False
+            )
 
-        if not os.path.exists(f"{cfg.DATASET_DIR}/dataset_metadata_ctl_single.csv"):
+        if not os.path.exists(f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_single.csv"):
             # create single image singature
             image_meta_df["image_single_signature"] = image_meta_df[
                 ["image_signature", "product_type"]
@@ -241,7 +243,9 @@ class FashionCompleteTheLookDataloader:
             # save to csv
             image_meta_df[
                 ["image_single_signature", "x", "y", "w", "h", "product_type"]
-            ].drop_duplicates().to_csv(f"{cfg.DATASET_DIR}/dataset_metadata_ctl_single.csv")
+            ].drop_duplicates().to_csv(
+                f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_single.csv"
+            )
 
     def triplet_data_loader(self):
         """Dataloader for FashionProductCTLTripletDataset"""
@@ -257,7 +261,7 @@ class FashionCompleteTheLookDataloader:
         # create the dataset and the stl_dataloader
         dataset = FashionProductCTLTripletDataset(
             cfg.RAW_DATA_FOLDER,
-            f"{cfg.DATASET_DIR}/dataset_metadata_ctl_triplets.csv",
+            f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_triplets.csv",
             transform=transformations,
         )
         return DataLoader(
@@ -282,7 +286,7 @@ class FashionCompleteTheLookDataloader:
         # create the dataset and the stl_dataloader
         dataset = FashionProductCTLSingleDataset(
             cfg.RAW_DATA_FOLDER,
-            f"{cfg.DATASET_DIR}/dataset_metadata_ctl_single.csv",
+            f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_single.csv",
             transform=transformations,
         )
         return DataLoader(

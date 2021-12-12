@@ -44,7 +44,9 @@ class StyleEmbedding:
         all_features = torch.cat(all_features).to(cfg.device)
 
         # save all features to a pickle file
-        with open(f"{cfg.PACKAGE_ROOT}/features/{task_name}_embedding.pickle", "wb") as handle:
+        with open(
+            f"{cfg.PACKAGE_ROOT}/features/cached_embeddings/{task_name}_embedding.pickle", "wb"
+        ) as handle:
             pickle.dump(all_features, handle, protocol=pickle.HIGHEST_PROTOCOL)
         return all_features
 
@@ -79,7 +81,9 @@ class StyleEmbedding:
         all_features = torch.cat(all_features).to(cfg.device)
 
         # save all features to a pickle file
-        with open(f"{cfg.PACKAGE_ROOT}/features/{task_name}_embedding.pickle", "wb") as handle:
+        with open(
+            f"{cfg.PACKAGE_ROOT}/features/cached_embeddings/{task_name}_embedding.pickle", "wb"
+        ) as handle:
             pickle.dump(all_features, handle, protocol=pickle.HIGHEST_PROTOCOL)
         return all_features
 
