@@ -239,9 +239,9 @@ class FashionCompleteTheLookDataloader:
             ].agg("_".join, axis=1)
 
             # save to csv
-            image_meta_df[["image_single_signature", "product_type"]].drop_duplicates().to_csv(
-                f"{cfg.DATASET_DIR}/dataset_metadata_ctl_single.csv"
-            )
+            image_meta_df[
+                ["image_single_signature", "x", "y", "w", "h", "product_type"]
+            ].drop_duplicates().to_csv(f"{cfg.DATASET_DIR}/dataset_metadata_ctl_single.csv")
 
     def triplet_data_loader(self):
         """Dataloader for FashionProductCTLTripletDataset"""

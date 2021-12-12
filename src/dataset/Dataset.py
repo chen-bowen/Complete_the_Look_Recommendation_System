@@ -4,7 +4,6 @@ import os
 import pandas as pd
 from PIL import Image, ImageFile
 from src.config import config as cfg
-from src.utils.image_utils import bounding_box_process
 from torch.utils.data import Dataset
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
@@ -83,14 +82,26 @@ class FashionProductCTLSingleDataset(Dataset):
 
     def __getitem__(self, index):
         img_id = self.metadata.reset_index().iloc[index, 0]
-        img = Image.open(
-            os.path.join(
-                cfg.PACKAGE_ROOT,
-                "dataset/data/fashion_v2/",
-                f"{self.data_type}_single",
-                self.metadata.loc[img_id, "image_single_signature"] + ".jpg",
+        try:
+            img = Image.open(
+                os.path.join(
+                    cfg.PACKAGE_ROOT,
+                    "dataset/data/fashion_v2/",
+                    f"{self.data_type}_single",
+                    self.metadata.loc[img_id, "image_single_signature"] + ".jpg",
+                )
+            ).convert("RGB")
+        except FileNotFoundError:
+            img_src = Image.open(
+                os.path.join(
+                    cfg.PACKAGE_ROOT,
+                    "dataset/data/fashion_v2/",
+                    f"{self.data_type}",
+                    self.metadata.loc[img_id, "image_single_signature"].split("_")[0] + ".jpg",
+                )
             )
-        ).convert("RGB")
+            bounding_box = self.metadata.iloc[img_id, 2:6].to_list()
+            img = img_src.crop(bounding_box)
 
         if self.transform is not None:
             img = self.transform(img)
