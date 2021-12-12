@@ -4,7 +4,11 @@ import random
 
 import pandas as pd
 from src.config import config as cfg
-from src.dataset.Dataset import FashionProductCTLTripletDataset, FashionProductSTLDataset
+from src.dataset.Dataset import (
+    FashionProductCTLSingleDataset,
+    FashionProductCTLTripletDataset,
+    FashionProductSTLDataset,
+)
 from src.utils.image_utils import convert_to_url
 from torch.utils.data import DataLoader
 from torchvision import transforms
@@ -78,7 +82,7 @@ class FashionProductSTLDataloader:
             transform=transformations,
             subset="product",
         )
-        return DataLoader(dataset, batch_size=cfg.BATCH_SIZE, shuffle=False, num_workers=10)
+        return DataLoader(dataset, batch_size=cfg.BATCH_SIZE, shuffle=False, num_workers=5)
 
 
 MAX_TRIPLETS_PER_OUTFIT = None  # maximum number of triplets sampled from a single outfit
@@ -88,13 +92,18 @@ SKIP_IF_POS_SAME_CATEGORY_AS_ANCHOR = (
 
 
 class FashionCompleteTheLookDataloader:
-
-    def __init__(self, image_type="train", batch_size=cfg.BATCH_SIZE, num_workers=10):
-
+    def __init__(self, image_type="train", batch_size=cfg.BATCH_SIZE, num_workers=8):
         self.image_type = image_type
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.build_metadata_csv()
+
+    @property
+    def img_file_map(self):
+        return {
+            "train": f"{cfg.DATASET_DIR}/data/complete-the-look-dataset/datasets/raw_train.tsv",
+            "test": f"{cfg.DATASET_DIR}/data/complete-the-look-dataset/datasets/raw_test.tsv",
+        }
 
     @staticmethod
     def sample_triplets(data_by_sig, data_by_cat):
@@ -170,21 +179,18 @@ class FashionCompleteTheLookDataloader:
 
     def build_metadata_csv(self):
         """
-        Creates the metadata csv file that could be used for image data generator，
+        Creates the triplets metadata csv file that could be used for training data generator，
         metadata includes a triplet of anchor, postive and negative image
         """
         # if the file exists, skip
-        if os.path.exists(f"{cfg.DATASET_DIR}/dataset_metadata_ctl_triplets.csv"):
+        if os.path.exists(
+            f"{cfg.DATASET_DIR}/dataset_metadata_ctl_triplets.csv"
+        ) and os.path.exists(f"{cfg.DATASET_DIR}/dataset_metadata_ctl_single.csv"):
             return
-
-        img_file_map = {
-            "train": f"{cfg.DATASET_DIR}/data/complete-the-look-dataset/datasets/raw_train.tsv",
-            "test": f"{cfg.DATASET_DIR}/data/complete-the-look-dataset/datasets/raw_test.tsv",
-        }
 
         # read csv metadata file
         image_meta_df = pd.read_csv(
-            img_file_map[self.image_type], sep="\t", header=None, skiprows=1
+            self.img_file_map[self.image_type], sep="\t", header=None, skiprows=1
         )
         image_meta_df.columns = "image_signature x  y  w  h product_type".split()
 
@@ -195,37 +201,49 @@ class FashionCompleteTheLookDataloader:
         ]
         image_meta_df = image_meta_df[image_meta_df["image_signature"].isin(existing_images_name)]
 
-        # group by image signature and product type
-        image_meta_df["img_info"] = image_meta_df.apply(
-            lambda x: {
-                "image_signature": x["image_signature"],
-                "x": x["x"],
-                "y": x["y"],
-                "w": x["w"],
-                "h": x["h"],
-                "product_type": x["product_type"],
-            },
-            axis=1,
-        )
-        image_meta_by_signature = (
-            image_meta_df[["image_signature", "img_info"]]
-            .groupby("image_signature")
-            .agg({"img_info": list})
-        ).to_dict()["img_info"]
+        if not os.path.exists(f"{cfg.DATASET_DIR}/dataset_metadata_ctl_triplets.csv"):
+            # group by image signature and product type
+            image_meta_df["img_info"] = image_meta_df.apply(
+                lambda x: {
+                    "image_signature": x["image_signature"],
+                    "x": x["x"],
+                    "y": x["y"],
+                    "w": x["w"],
+                    "h": x["h"],
+                    "product_type": x["product_type"],
+                },
+                axis=1,
+            )
+            image_meta_by_signature = (
+                image_meta_df[["image_signature", "img_info"]]
+                .groupby("image_signature")
+                .agg({"img_info": list})
+            ).to_dict()["img_info"]
 
-        image_meta_by_product_type = (
-            image_meta_df[["product_type", "img_info"]]
-            .groupby("product_type")
-            .agg({"img_info": list})
-        ).to_dict()["img_info"]
+            image_meta_by_product_type = (
+                image_meta_df[["product_type", "img_info"]]
+                .groupby("product_type")
+                .agg({"img_info": list})
+            ).to_dict()["img_info"]
 
-        # sample triplets
-        triplets = self.sample_triplets(image_meta_by_signature, image_meta_by_product_type)
+            # sample triplets
+            triplets = self.sample_triplets(image_meta_by_signature, image_meta_by_product_type)
 
-        # save to csv
-        triplets.to_csv(f"{cfg.DATASET_DIR}/dataset_metadata_ctl_triplets.csv", index=False)
+            # save to csv
+            triplets.to_csv(f"{cfg.DATASET_DIR}/dataset_metadata_ctl_triplets.csv", index=False)
 
-    def data_loader(self):
+        if not os.path.exists(f"{cfg.DATASET_DIR}/dataset_metadata_ctl_single.csv"):
+            # create single image singature
+            image_meta_df["image_single_signature"] = image_meta_df[
+                ["image_signature", "product_type"]
+            ].agg("_".join, axis=1)
+
+            # save to csv
+            image_meta_df[["image_single_signature", "product_type"]].drop_duplicates().to_csv(
+                f"{cfg.DATASET_DIR}/dataset_metadata_ctl_single.csv"
+            )
+
+    def triplet_data_loader(self):
         """Dataloader for FashionProductCTLTripletDataset"""
         # define transformations
         transformations = transforms.Compose(
@@ -243,10 +261,39 @@ class FashionCompleteTheLookDataloader:
             transform=transformations,
         )
         return DataLoader(
-            dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers
+            dataset,
+            batch_size=self.batch_size,
+            shuffle=True,
+            num_workers=self.num_workers,
+            pin_memory=True,
+        )
+
+    def single_data_loader(self):
+        """Dataloader for FashionProductCTLSingleDataset"""
+        # define transformations
+        transformations = transforms.Compose(
+            [
+                transforms.Resize((cfg.HEIGHT, cfg.WIDTH)),
+                transforms.ToTensor(),
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+            ]
+        )
+
+        # create the dataset and the stl_dataloader
+        dataset = FashionProductCTLSingleDataset(
+            cfg.RAW_DATA_FOLDER,
+            f"{cfg.DATASET_DIR}/dataset_metadata_ctl_single.csv",
+            transform=transformations,
+        )
+        return DataLoader(
+            dataset,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=self.num_workers,
+            pin_memory=True,
         )
 
 
 if __name__ == "__main__":
     # dl = FashionProductSTLDataloader().data_loader()
-    dl2 = FashionCompleteTheLookDataloader().data_loader()
+    dl2 = FashionCompleteTheLookDataloader().triplet_data_loader()

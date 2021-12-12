@@ -9,12 +9,11 @@ from src.utils.model_utils import init_weights
 from tqdm import tqdm
 
 
-def train_compatibility_model(num_epochs=10, batch_size=32):
+def train_compatibility_model(num_epochs=2, batch_size=16):
     """train compatibility model with the triplets data"""
-
     model = CompatibilityModel()
-    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    train_dataloader = FashionCompleteTheLookDataloader(batch_size=batch_size).data_loader()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    train_dataloader = FashionCompleteTheLookDataloader(batch_size=batch_size).triplet_data_loader()
 
     # freeze the base model part of the compatibility model
     for name, param in model.named_parameters():
@@ -25,12 +24,10 @@ def train_compatibility_model(num_epochs=10, batch_size=32):
     model.apply(init_weights)
     model.train()
 
-    # # compile the model, define loss and optimizer using JIT
-    # model = torch.jit.script(model).to(cfg.device)
-    model = model.to(cfg.device)
+    # compile the model, define loss and optimizer using JIT
+    model = torch.jit.script(model).to(device)
     optimizer = optim.Adam(model.parameters(), lr=0.005)
-    # criterion = torch.jit.script(TripletLoss())
-    criterion = TripletLoss()
+    criterion = torch.jit.script(TripletLoss())
 
     # training loop
     for epoch in tqdm(range(num_epochs), desc="Epochs"):
@@ -40,10 +37,9 @@ def train_compatibility_model(num_epochs=10, batch_size=32):
             tqdm(train_dataloader, desc="Training", leave=False)
         ):
             # send triplets to device
-
-            anchor = anchor.to(cfg.device)
-            positive = positive.to(cfg.device)
-            negative = negative.to(cfg.device)
+            anchor = anchor.to(device)
+            positive = positive.to(device)
+            negative = negative.to(device)
 
             # forward pass through the model and obtain features for the triplets
             anchor_features = model(anchor)
@@ -61,16 +57,20 @@ def train_compatibility_model(num_epochs=10, batch_size=32):
             optimizer.step()
 
             # append batch loss to epoch loss
-            loss_epoch.append(loss.cpu().detach().numpy())
+            if i % 1000 == 0:
+                loss_epoch.append(loss.cpu().detach().numpy())
 
         # print training loss progress
         print("Epoch: {}/{} - Loss: {:.4f}".format(epoch + 1, num_epochs, np.mean(loss_epoch)))
 
-    # save the trained model to the models directory
-    torch.save(
-        {"model_state_dict": model.state_dict(), "optimzier_state_dict": optimizer.state_dict()},
-        f"{cfg.TRAINED_MODEL_DIR}/trained_compatibility_model.pth",
-    )
+        # save the trained model to the models directory
+        torch.save(
+            {
+                "model_state_dict": model.state_dict(),
+                "optimzier_state_dict": optimizer.state_dict(),
+            },
+            f"{cfg.TRAINED_MODEL_DIR}/trained_compatibility_model_epoch{epoch}.pth",
+        )
 
 
 if __name__ == "__main__":

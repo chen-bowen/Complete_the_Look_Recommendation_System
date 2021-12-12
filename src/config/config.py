@@ -5,7 +5,7 @@ import src
 PACKAGE_ROOT = pathlib.Path(src.__file__).resolve().parent
 
 BATCHES = 8
-BATCH_SIZE = 64
+BATCH_SIZE = 32
 # RAW_DATA_FOLDER = PACKAGE_ROOT / "dataset/data/fashion"
 RAW_DATA_FOLDER = "dataset/data/fashion"
 DATASET_DIR = PACKAGE_ROOT / "dataset"
