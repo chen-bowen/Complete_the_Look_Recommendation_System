@@ -123,7 +123,7 @@ def get_images_complete_the_look(image_category, image_type):
         axis=1,
     )
     # check for existing images and remove them from the download list
-    existed = [x[:-4] for x in listdir("./fashion_v2/train")]
+    existed = [x[:-4] for x in listdir(f"./fashion_v2/{image_type}")]
     image_meta_df = image_meta_df[~image_meta_df["image_signature"].isin(existed)]
 
     # convert to list
