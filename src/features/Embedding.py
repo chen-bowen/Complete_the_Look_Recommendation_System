@@ -72,6 +72,7 @@ class StyleEmbedding:
         all_features = []
 
         for batch in tqdm.tqdm(data_loader):
+            
             X = transforms(batch)  # resizes to 256 X 256 for ResNet
             X = X.float().to(cfg.device)
             with torch.no_grad():

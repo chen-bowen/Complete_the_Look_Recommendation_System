@@ -103,7 +103,7 @@ def download_and_save_inages_complete_the_look(res, image_category, image_type):
 def get_images_complete_the_look(image_category, image_type):
     img_file_map = {
         "train": "./complete-the-look-dataset/datasets/raw_train.tsv",
-        "test": "./complete-the-look-dataset/datasets/raw_test.tsv",
+        "test": "dataset/data/complete-the-look-dataset/datasets/raw_test.tsv",
         "triplet_train_1": "./complete-the-look-dataset/datasets/triplet_train_p1.tsv",
         "triplet_train_2": "./complete-the-look-dataset/datasets/triplet_train_p2.tsv",
     }
