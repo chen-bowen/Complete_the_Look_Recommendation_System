@@ -85,6 +85,7 @@ class FashionProductSTLDataloader:
         return DataLoader(dataset, batch_size=cfg.BATCH_SIZE, shuffle=False, num_workers=5)
 
 
+
 MAX_TRIPLETS_PER_OUTFIT = None  # maximum number of triplets sampled from a single outfit
 SKIP_IF_POS_SAME_CATEGORY_AS_ANCHOR = (
     True  # whether or not anchor and pos/neg must be from different categories
@@ -253,7 +254,7 @@ class FashionCompleteTheLookDataloader:
             ].agg("_".join, axis=1)
 
             # merge image metadata df train and test
-            image_meta_df = pd.concat([image_meta_df, image_meta_test_df])
+            image_meta_df = pd.concat([image_meta_df, image_meta_test_df]).reset_index()
 
             # save to csv
             image_meta_df[
@@ -301,14 +302,21 @@ class FashionCompleteTheLookDataloader:
         # create the dataset and the ctl single dataloader
         dataset = FashionProductCTLSingleDataset(
             cfg.RAW_DATA_FOLDER,
-            f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_single.csv",
+            # f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_single.csv",
+
+            # This file is for created just the test metadata
+            f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_test_single.csv",
+            
             data_type=self.image_type,
             transform=transformations,
         )
+        # breakpoint()
         return DataLoader(
             dataset,
             batch_size=self.batch_size,
+
             shuffle=False,
+
             num_workers=self.num_workers,
             pin_memory=True,
         )

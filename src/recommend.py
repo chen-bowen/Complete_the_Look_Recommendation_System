@@ -89,30 +89,15 @@ def recommend_complementary_products(product_id, task_name="compatible_product",
 
 if __name__ == "__main__":
     import random
+    product_id=random.randint(1, 38000)
+    recommendations = recommend_similar_products(product_id)
+    from utils.image_utils import display_recommended_products, display_recommended_products_one_row
 
-    # similar_recommendations = recommend_similar_products(product_id=random.randint(1, 38000))
-    compatible_recommendations = recommend_complementary_products(
-        product_id=random.randint(1, 454000)
-    )
+    print(recommendations)
+    display_recommended_products_one_row(
+        recommendations["input_product"]["image_path"],
+        *[rec["image_path"] for rec in recommendations["recommended_products"]],
+        [round(rec["similarity_score"], 3) for rec in recommendations["recommended_products"]],
+        product_id
 
-    from utils.image_utils import display_recommended_products
-
-    # print(similar_recommendations)
-    # display_recommended_products(
-    #     similar_recommendations["input_product"]["image_path"],
-    #     *[rec["image_path"] for rec in similar_recommendations["recommended_products"]],
-    #     [
-    #         round(rec["similarity_score"], 3)
-    #         for rec in similar_recommendations["recommended_products"]
-    #     ],
-    # )
-
-    print(compatible_recommendations)
-    display_recommended_products(
-        compatible_recommendations["input_product"]["image_path"],
-        *[rec["image_path"] for rec in compatible_recommendations["recommended_products"]],
-        [
-            round(rec["compatibility_score"], 3)
-            for rec in compatible_recommendations["recommended_products"]
-        ],
     )
