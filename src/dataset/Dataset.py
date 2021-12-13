@@ -75,7 +75,11 @@ class FashionProductCTLSingleDataset(Dataset):
         self.image_dir = image_dir
         self.data_type = data_type
         self.transform = transform
-        self.metadata = pd.read_csv(metadata_file)
+        self.create_metadata(metadata_file)
+
+    def create_metadata(self, metadata_file):
+        metadata = pd.read_csv(metadata_file)
+        self.metadata = metadata[metadata["image_type"] == self.data_type]
 
     def __len__(self):
         return len(self.metadata)
