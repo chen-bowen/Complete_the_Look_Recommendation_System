@@ -192,9 +192,7 @@ class FashionCompleteTheLookDataloader:
             return
 
         # read csv metadata file
-        image_meta_df = pd.read_csv(
-            self.img_file_map[self.image_type], sep="\t", header=None, skiprows=1
-        )
+        image_meta_df = pd.read_csv(self.img_file_map["train"], sep="\t", header=None, skiprows=1)
         image_meta_df.columns = "image_signature x  y  w  h product_type".split()
 
         # filter the image metadata df to contain only images that existed
@@ -243,9 +241,26 @@ class FashionCompleteTheLookDataloader:
                 ["image_signature", "product_type"]
             ].agg("_".join, axis=1)
 
+            image_meta_df["image_type"] = "train"
+
+            # read in test csv and concat with the image meta df
+            image_meta_test_df = pd.read_csv(
+                self.img_file_map["test"], sep="\t", header=None, skiprows=1
+            )
+            image_meta_test_df.columns = "image_signature x  y  w  h product_type".split()
+            image_meta_test_df["image_type"] = "test"
+
+            # add image single signatureto image meta test df
+            image_meta_test_df["image_single_signature"] = image_meta_df[
+                ["image_signature", "product_type"]
+            ].agg("_".join, axis=1)
+
+            # merge image metadata df train and test
+            image_meta_df = pd.concat([image_meta_df, image_meta_test_df])
+
             # save to csv
             image_meta_df[
-                ["image_single_signature", "x", "y", "w", "h", "product_type"]
+                ["image_single_signature", "x", "y", "w", "h", "product_type", "image_type"]
             ].drop_duplicates().to_csv(
                 f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_single.csv"
             )
@@ -286,10 +301,11 @@ class FashionCompleteTheLookDataloader:
             ]
         )
 
-        # create the dataset and the stl_dataloader
+        # create the dataset and the ctl single dataloader
         dataset = FashionProductCTLSingleDataset(
             cfg.RAW_DATA_FOLDER,
             f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_single.csv",
+            data_type=self.image_type,
             transform=transformations,
         )
         return DataLoader(
@@ -305,4 +321,5 @@ class FashionCompleteTheLookDataloader:
 
 if __name__ == "__main__":
     # dl = FashionProductSTLDataloader().data_loader()
-    dl2 = FashionCompleteTheLookDataloader().triplet_data_loader()
+    # dl2 = FashionCompleteTheLookDataloader().triplet_data_loader()
+    dl3 = FashionCompleteTheLookDataloader().single_data_loader()
