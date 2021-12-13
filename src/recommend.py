@@ -72,17 +72,16 @@ def recommend_complementary_products(product_id, task_name="compatible_product",
 
     # get top 5 products metadata
     recommended_products_metadata_all_cat = (
-        metadata[
-            (metadata["product_type"] == input_product_category)
-            & (metadata["similarity_score"] != 1)
-        ]
-        .sort_values(by="compatibility_score", ascending=False)
+        metadata[(metadata["product_type"] != input_product_category)]
+        .sort_values(by="compatibility_score", ascending=True)
         .groupby("product_type")
         .head(1)
     )
     return {
         "input_product": product_metadata,
-        "recommended_compatible_products": recommended_products_metadata_all_cat.head(top_n),
+        "recommended_compatible_products": recommended_products_metadata_all_cat.head(
+            top_n
+        ).to_dict(orient="records"),
     }
 
 

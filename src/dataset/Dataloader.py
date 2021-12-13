@@ -254,12 +254,22 @@ class FashionCompleteTheLookDataloader:
 
             # merge image metadata df train and test
             image_meta_df = pd.concat([image_meta_df, image_meta_test_df]).reset_index()
+            image_meta_df["product_id"] = image_meta_df.index
 
             # save to csv
             image_meta_df[
-                ["image_single_signature", "x", "y", "w", "h", "product_type", "image_type"]
+                [
+                    "product_id",
+                    "image_single_signature",
+                    "x",
+                    "y",
+                    "w",
+                    "h",
+                    "product_type",
+                    "image_type",
+                ]
             ].drop_duplicates().to_csv(
-                f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_single.csv"
+                f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_single.csv", index=False
             )
 
     def triplet_data_loader(self):
@@ -305,7 +315,6 @@ class FashionCompleteTheLookDataloader:
             data_type=self.image_type,
             transform=transformations,
         )
-        # breakpoint()
         return DataLoader(
             dataset,
             batch_size=self.batch_size,
