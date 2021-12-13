@@ -1,7 +1,7 @@
 import pickle
 
 from src.config import config as cfg
-from src.dataset.Dataloader import FashionProductCTLSingleDataset, FashionProductSTLDataloader
+from src.dataset.Dataloader import FashionCompleteTheLookDataloader, FashionProductSTLDataloader
 from src.utils.similarity import calculate_similarity
 
 
@@ -54,7 +54,7 @@ def recommend_complementary_products(product_id, task_name="compatible_product",
         all_compatible_products_features = pickle.load(file)
 
     # get dataset metadata dataframe
-    data_loader = FashionProductCTLSingleDataset().data_loader()
+    data_loader = FashionCompleteTheLookDataloader().single_data_loader()
     metadata = data_loader.dataset.metadata
 
     # get query feature from product id
