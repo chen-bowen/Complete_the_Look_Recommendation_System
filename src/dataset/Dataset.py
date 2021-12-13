@@ -81,7 +81,13 @@ class FashionProductCTLSingleDataset(Dataset):
         return len(self.metadata)
 
     def __getitem__(self, index):
+        # filter by image type in metadata
+        self.metadata = self.metadata[self.metadata["image_type"] == self.data_type]
+
+        # get image id
         img_id = self.metadata.reset_index().iloc[index, 0]
+
+        # get and load cropped image
         try:
             img = Image.open(
                 os.path.join(
