@@ -41,7 +41,7 @@ class StyleEmbedding:
                 batch_features = resnet(X)
                 all_features.append(batch_features)
 
-        all_features = torch.cat(all_features).to(cfg.device)
+        all_features = torch.cat(all_features).to("cpu")
 
         # save all features to a pickle file
         with open(
@@ -78,7 +78,9 @@ class StyleEmbedding:
                 batch_features = model(X)
                 all_features.append(batch_features)
 
-        all_features = torch.cat(all_features).to(cfg.device)
+        all_features = torch.cat(all_features).to(
+            "cpu"
+        )  # send it to cpu for the pickle to be read properly
 
         # save all features to a pickle file
         with open(
