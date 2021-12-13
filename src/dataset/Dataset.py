@@ -2,11 +2,9 @@ import ast
 import os
 
 import pandas as pd
-from PIL import Image, ImageFile
+from PIL import Image
 from src.config import config as cfg
 from torch.utils.data import Dataset
-
-ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 class FashionProductSTLDataset(Dataset):
@@ -100,7 +98,7 @@ class FashionProductCTLSingleDataset(Dataset):
                     self.metadata.loc[img_id, "image_single_signature"] + ".jpg",
                 )
             ).convert("RGB")
-        except FileNotFoundError:
+        except:
             img_src = Image.open(
                 os.path.join(
                     cfg.PACKAGE_ROOT,

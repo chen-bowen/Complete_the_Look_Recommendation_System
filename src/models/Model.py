@@ -5,7 +5,7 @@ from torchvision import models
 class CompatibilityModel(nn.Module):
     """Custom model to measure compatibility between fashion products"""
 
-    def __init__(self, hidden_dim=256, emb_dim=128, dropout=0.4):
+    def __init__(self, hidden_dim=256, emb_dim=128, dropout=0.5):
         super(CompatibilityModel, self).__init__()
         # use resnet34 as base model
         self.create_base_model()

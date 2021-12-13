@@ -1,9 +1,9 @@
 import numpy as np
 import torch
 import torch.optim as optim
+import torchvision
 from src.config import config as cfg
 from src.dataset.Dataloader import FashionCompleteTheLookDataloader
-from src.losses.loss_function import TripletLoss
 from src.models.Model import CompatibilityModel
 from src.utils.model_utils import init_weights
 from torch.cuda.amp import GradScaler, autocast
@@ -22,7 +22,6 @@ def train_compatibility_model(num_epochs=2, batch_size=32):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     train_dataloader = FashionCompleteTheLookDataloader(batch_size=batch_size).triplet_data_loader()
 
-
     # freeze the base model part of the compatibility model
     for name, param in model.named_parameters():
         if name.split(".")[0] == "base_model":
@@ -35,42 +34,38 @@ def train_compatibility_model(num_epochs=2, batch_size=32):
     # compile the model, define loss and optimizer using JIT
 
     model = torch.jit.script(model).to(device)
-    optimizer = optim.Adam(model.parameters(), lr=0.005)
-    criterion = torch.jit.script(TripletLoss())
-
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    criterion = torch.jit.script(torch.nn.TripletMarginLoss())
 
     # training loop
     for epoch in tqdm(range(num_epochs), desc="Epochs"):
 
         loss_epoch = []
-        print(cfg.device)
         for i, (anchor, positive, negative) in enumerate(
             tqdm(train_dataloader, desc="Training", leave=False)
         ):
             # send triplets to device
-
             anchor = anchor.to(device)
             positive = positive.to(device)
             negative = negative.to(device)
 
-
             # forward pass through the model and obtain features for the triplets
-
             anchor_features = model(anchor)
             positive_features = model(positive)
             negative_features = model(negative)
 
             # calculate loss and backward pass through the model
             loss = criterion(anchor_features, positive_features, negative_features)
-            loss.backward(inputs=tuple(model.embedding_layers.parameters()), retain_graph=True)
+            loss.backward()
 
             # update the weights
             optimizer.step()
 
             # append batch loss to epoch loss
 
-            if i % 1000 == 0:
+            if i % 20 == 0:
                 loss_epoch.append(loss.cpu().detach().numpy())
+                print("Loss: {:.4f}".format(loss.cpu().detach().numpy()))
 
         # print training loss progress
         print("Epoch: {}/{} - Loss: {:.4f}".format(epoch + 1, num_epochs, np.mean(loss_epoch)))

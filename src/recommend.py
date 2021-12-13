@@ -55,7 +55,9 @@ def recommend_complementary_products(product_id, task_name="compatible_product",
 
     # get dataset metadata dataframe
     data_loader = FashionCompleteTheLookDataloader().single_data_loader()
-    metadata = data_loader.dataset.metadata
+    metadata = data_loader.dataset.metadata[
+        ["product_id", "image_single_signature", "product_type"]
+    ]
 
     # get query feature from product id
     product_metadata = metadata[metadata["product_id"] == product_id].to_dict(orient="records")[0]
@@ -69,6 +71,8 @@ def recommend_complementary_products(product_id, task_name="compatible_product",
     # get query product category and filter the prpduct catelog for the same category
     input_product_category = product_metadata["product_type"]
     metadata["compatibility_score"] = compatibility_score.cpu()
+
+    breakpoint()
 
     # get top 5 products metadata
     recommended_products_metadata_all_cat = (
