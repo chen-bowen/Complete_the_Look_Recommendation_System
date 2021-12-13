@@ -93,9 +93,7 @@ SKIP_IF_POS_SAME_CATEGORY_AS_ANCHOR = (
 
 
 class FashionCompleteTheLookDataloader:
-
     def __init__(self, image_type="train", batch_size=cfg.BATCH_SIZE, num_workers=8):
-
         self.image_type = image_type
         self.batch_size = batch_size
         self.num_workers = num_workers
@@ -256,7 +254,7 @@ class FashionCompleteTheLookDataloader:
             ].agg("_".join, axis=1)
 
             # merge image metadata df train and test
-            image_meta_df = pd.concat([image_meta_df, image_meta_test_df])
+            image_meta_df = pd.concat([image_meta_df, image_meta_test_df]).reset_index()
 
             # save to csv
             image_meta_df[
@@ -304,10 +302,15 @@ class FashionCompleteTheLookDataloader:
         # create the dataset and the ctl single dataloader
         dataset = FashionProductCTLSingleDataset(
             cfg.RAW_DATA_FOLDER,
-            f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_single.csv",
+            # f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_single.csv",
+
+            # This file is for created just the test metadata
+            f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_test_single.csv",
+            
             data_type=self.image_type,
             transform=transformations,
         )
+        # breakpoint()
         return DataLoader(
             dataset,
             batch_size=self.batch_size,
