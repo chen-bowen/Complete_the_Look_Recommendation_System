@@ -302,15 +302,15 @@ class FashionCompleteTheLookDataloader:
         # create the dataset and the ctl single dataloader
         dataset = FashionProductCTLSingleDataset(
             cfg.RAW_DATA_FOLDER,
-            # f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_single.csv",
+            f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_single.csv",
 
             # This file is for created just the test metadata
-            f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_test_single.csv",
+            # f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_test_single.csv",
             
             data_type=self.image_type,
             transform=transformations,
         )
-        # breakpoint()
+        
         return DataLoader(
             dataset,
             batch_size=self.batch_size,

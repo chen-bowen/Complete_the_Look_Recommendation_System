@@ -70,7 +70,7 @@ class StyleEmbedding:
         model.eval()
         transforms = torchvision.transforms.Resize(256)
         all_features = []
-
+        
         for batch in tqdm.tqdm(data_loader):
             
             X = transforms(batch)  # resizes to 256 X 256 for ResNet
