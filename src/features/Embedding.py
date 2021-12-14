@@ -62,7 +62,7 @@ class StyleEmbedding:
         print("You are using device: %s" % cfg.device)
         model = CompatibilityModel()
         model.load_state_dict(
-            torch.load(f"{cfg.TRAINED_MODEL_DIR}/trained_compatibility_model_epoch1.pth")[
+            torch.load(f"{cfg.TRAINED_MODEL_DIR}/trained_compatibility_model_epoch0.pth")[
                 "model_state_dict"
             ]
         )
@@ -94,12 +94,18 @@ if __name__ == "__main__":
     # StyleEmbedding().similar_product_embedding(
     #     data_loader=FashionProductSTLDataloader().data_loader(), task_name="similar_product"
     # )
-    StyleEmbedding().similar_product_embedding(
-        data_loader=FashionCompleteTheLookDataloader().single_data_loader(),
-        task_name="similar_prod_CTL",
+    # StyleEmbedding().similar_product_embedding(
+    #     data_loader=FashionCompleteTheLookDataloader().single_data_loader(),
+    #     task_name="similar_prod_CTL",
+    # )
+
+    StyleEmbedding().compatible_product_embedding(
+        data_loader=FashionCompleteTheLookDataloader(image_type="test").single_data_loader(),
+        task_name="compatible_product_test",
     )
 
-    # StyleEmbedding().compatible_product_embedding(
-    #     data_loader=FashionCompleteTheLookDataloader().single_data_loader(),
-    #     task_name="compatible_product",
-    # )
+
+    StyleEmbedding().compatible_product_embedding(
+        data_loader=FashionCompleteTheLookDataloader().single_data_loader(),
+        task_name="compatible_product",
+    )

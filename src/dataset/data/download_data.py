@@ -155,5 +155,5 @@ def get_images_complete_the_look(image_category, image_type):
 
 if __name__ == "__main__":
     # get_images_stl("fashion", "product")
-    get_images_complete_the_look("fashion_v2", "train")
+    # get_images_complete_the_look("fashion_v2", "train")
     get_images_complete_the_look("fashion_v2", "test")

@@ -72,8 +72,6 @@ def recommend_complementary_products(product_id, task_name="compatible_product",
     input_product_category = product_metadata["product_type"]
     metadata["compatibility_score"] = compatibility_score.cpu()
 
-    breakpoint()
-
     # get top 5 products metadata
     recommended_products_metadata_all_cat = (
         metadata[(metadata["product_type"] != input_product_category)]

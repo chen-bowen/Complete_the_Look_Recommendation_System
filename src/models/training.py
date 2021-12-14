@@ -75,9 +75,10 @@ def train_compatibility_model(num_epochs=1, batch_size=32):
             {"model_state_dict": model.state_dict()},
             f"{cfg.TRAINED_MODEL_DIR}/trained_compatibility_model_epoch{epoch}.pth",
         )
-        # plot learning curve
-        plot_learning_curves(train_losses)
+        plot_learning_curves(training_losses)
 
 
 if __name__ == "__main__":
-    train_compatibility_model(batch_size=cfg.BATCH_SIZE)
+    # train_compatibility_model(batch_size=cfg.BATCH_SIZE)
+    # plot learning curve
+    
