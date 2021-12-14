@@ -33,12 +33,14 @@ def convert_to_url(signature):
     return prefix % (signature[0:2], signature[2:4], signature[4:6], signature)
 
 
-def plot_learning_curves(train_losses):
+def plot_learning_curves(train_losses, validation_losses):
     plt.figure(figsize=(10, 7))
     plt.plot(train_losses)
-    plt.xlabel("epoch")
+    plt.plot(validation_losses)
+    plt.legend(['train', 'val'], loc='upper left')
+    plt.xlabel("step")
     plt.ylabel("loss")
-    plt.title("Best Seq2seq Loss Curves")
+    plt.title("Compatible Product Embedding Loss")
     plt.savefig(f"Compatible Product Embedding Loss.png")
 
 

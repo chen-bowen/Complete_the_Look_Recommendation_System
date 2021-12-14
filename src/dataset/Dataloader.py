@@ -296,6 +296,7 @@ class FashionCompleteTheLookDataloader:
         dataset = FashionProductCTLTripletDataset(
             cfg.RAW_DATA_FOLDER,
             f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_triplets.csv",
+            data_type=self.image_type,
             transform=transformations,
         )
         return DataLoader(
