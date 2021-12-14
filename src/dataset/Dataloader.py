@@ -2,6 +2,7 @@ import json
 import os
 import random
 
+import numpy as np
 import pandas as pd
 from src.config import config as cfg
 from src.dataset.Dataset import (
@@ -83,7 +84,6 @@ class FashionProductSTLDataloader:
             subset="product",
         )
         return DataLoader(dataset, batch_size=cfg.BATCH_SIZE, shuffle=False, num_workers=5)
-
 
 
 MAX_TRIPLETS_PER_OUTFIT = None  # maximum number of triplets sampled from a single outfit
@@ -228,6 +228,14 @@ class FashionCompleteTheLookDataloader:
             # sample triplets
             triplets = self.sample_triplets(image_meta_by_signature, image_meta_by_product_type)
 
+            # set 90% full dataset to train and 10% to validation
+            data_type = np.array(["train"] * len(triplets))
+            validation_indices = random.choices(
+                np.arange(len(triplets)), k=int(0.1 * len(triplets))
+            )
+            data_type[validation_indices] = "validation"
+            triplets["image_type"] = data_type
+
             # save to csv
             triplets.to_csv(
                 f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_triplets.csv", index=False
@@ -249,18 +257,28 @@ class FashionCompleteTheLookDataloader:
             image_meta_test_df["image_type"] = "test"
 
             # add image single signatureto image meta test df
-            image_meta_test_df["image_single_signature"] = image_meta_df[
+            image_meta_test_df["image_single_signature"] = image_meta_test_df[
                 ["image_signature", "product_type"]
             ].agg("_".join, axis=1)
 
             # merge image metadata df train and test
             image_meta_df = pd.concat([image_meta_df, image_meta_test_df]).reset_index()
+            image_meta_df["product_id"] = image_meta_df.index
 
             # save to csv
             image_meta_df[
-                ["image_single_signature", "x", "y", "w", "h", "product_type", "image_type"]
+                [
+                    "product_id",
+                    "image_single_signature",
+                    "x",
+                    "y",
+                    "w",
+                    "h",
+                    "product_type",
+                    "image_type",
+                ]
             ].drop_duplicates().to_csv(
-                f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_single.csv"
+                f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_single.csv", index=False
             )
 
     def triplet_data_loader(self):
@@ -278,6 +296,7 @@ class FashionCompleteTheLookDataloader:
         dataset = FashionProductCTLTripletDataset(
             cfg.RAW_DATA_FOLDER,
             f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_triplets.csv",
+            data_type=self.image_type,
             transform=transformations,
         )
         return DataLoader(
@@ -303,6 +322,7 @@ class FashionCompleteTheLookDataloader:
         dataset = FashionProductCTLSingleDataset(
             cfg.RAW_DATA_FOLDER,
             f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_single.csv",
+<<<<<<< HEAD
 
             # This file is for created just the test metadata
             # f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_test_single.csv",
@@ -311,12 +331,15 @@ class FashionCompleteTheLookDataloader:
             transform=transformations,
         )
         
+=======
+            data_type=self.image_type,
+            transform=transformations,
+        )
+>>>>>>> 86b48e29826cca07b2ca3010928bb6d6435b3bda
         return DataLoader(
             dataset,
             batch_size=self.batch_size,
-
             shuffle=False,
-
             num_workers=self.num_workers,
             pin_memory=True,
         )
@@ -324,5 +347,5 @@ class FashionCompleteTheLookDataloader:
 
 if __name__ == "__main__":
     # dl = FashionProductSTLDataloader().data_loader()
-    # dl2 = FashionCompleteTheLookDataloader().triplet_data_loader()
-    dl3 = FashionCompleteTheLookDataloader().single_data_loader()
+    dl2 = FashionCompleteTheLookDataloader().triplet_data_loader()
+    # dl3 = FashionCompleteTheLookDataloader().single_data_loader()
