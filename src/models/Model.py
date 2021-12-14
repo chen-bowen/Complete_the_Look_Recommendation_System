@@ -12,8 +12,8 @@ class CompatibilityModel(nn.Module):
         # add 2 layers on top of base model
         self.embedding_layers = nn.Sequential(
             nn.Linear(512, hidden_dim),
+            nn.BatchNorm1d(hidden_dim),
             nn.Dropout(dropout),
-            nn.ReLU(),
             nn.Linear(hidden_dim, emb_dim),
         )
 

@@ -2,11 +2,9 @@ import ast
 import os
 
 import pandas as pd
-from PIL import Image, ImageFile
+from PIL import Image
 from src.config import config as cfg
 from torch.utils.data import Dataset
-
-ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 class FashionProductSTLDataset(Dataset):
@@ -47,6 +45,7 @@ class FashionProductCTLTripletDataset(Dataset):
     def __getitem__(self, index):
 
         triplet_id = self.metadata.reset_index().iloc[index, 0]
+        data_src_folder = "train" if self.data_type in ["train", "validation"] else "test"
         # get the anchor, postive and negative image and save to img triplets
         img_triplets = []
         for img_type in ["anchor", "pos", "neg"]:
@@ -54,7 +53,7 @@ class FashionProductCTLTripletDataset(Dataset):
                 os.path.join(
                     cfg.PACKAGE_ROOT,
                     "dataset/data/fashion_v2/",
-                    f"{self.data_type}_single",
+                    f"{data_src_folder}_single",
                     self.metadata.loc[triplet_id, f"image_signature_{img_type}"]
                     + "_"
                     + self.metadata.loc[triplet_id, f"{img_type}_product_type"]
@@ -100,7 +99,7 @@ class FashionProductCTLSingleDataset(Dataset):
                     self.metadata.loc[img_id, "image_single_signature"] + ".jpg",
                 )
             ).convert("RGB")
-        except FileNotFoundError:
+        except:
             img_src = Image.open(
                 os.path.join(
                     cfg.PACKAGE_ROOT,
