@@ -2,10 +2,11 @@
 import os
 
 import numpy as np
+import requests
 from matplotlib import pyplot as plt
 from PIL import Image
 from src.config import config as cfg
-import requests
+
 
 def bounding_box_process(img, bounding_box):
     """
@@ -31,6 +32,7 @@ def convert_to_url(signature):
     prefix = "http://i.pinimg.com/400x/%s/%s/%s/%s"
     return prefix % (signature[0:2], signature[2:4], signature[4:6], signature)
 
+
 def plot_learning_curves(train_losses):
     plt.figure(figsize=(10, 7))
     plt.plot(train_losses)
@@ -38,6 +40,7 @@ def plot_learning_curves(train_losses):
     plt.ylabel("loss")
     plt.title("Best Seq2seq Loss Curves")
     plt.savefig(f"Compatible Product Embedding Loss.png")
+
 
 def display_recommended_products(im1, im2, im3, im4, im5, im6, simlarity_scores, save_image=True):
 
@@ -47,7 +50,7 @@ def display_recommended_products(im1, im2, im3, im4, im5, im6, simlarity_scores,
     # setting values to rows and column variables
     rows = 2  # 2
     columns = 5  # 2
-    if(save_image):
+    if save_image:
         # reading images
         input_image_size = Image.open(f"{cfg.DATASET_DIR}/{im1}").size
         Image1 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im1}"))
@@ -57,13 +60,37 @@ def display_recommended_products(im1, im2, im3, im4, im5, im6, simlarity_scores,
         Image5 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im5}").resize(input_image_size))
         Image6 = np.asarray(Image.open(f"{cfg.DATASET_DIR}/{im6}").resize(input_image_size))
     else:
-        input_image_size = Image.open(requests.get(convert_to_url(im1.split('/')[-1]), stream=True).raw).size
-        Image1 = np.asarray(Image.open(requests.get(convert_to_url(im1.split('/')[-1]), stream=True).raw))
-        Image2 = np.asarray(Image.open(requests.get(convert_to_url(im2.split('/')[-1]), stream=True).raw).resize(input_image_size))
-        Image3 = np.asarray(Image.open(requests.get(convert_to_url(im3.split('/')[-1]), stream=True).raw).resize(input_image_size))
-        Image4 = np.asarray(Image.open(requests.get(convert_to_url(im4.split('/')[-1]), stream=True).raw).resize(input_image_size))
-        Image5 = np.asarray(Image.open(requests.get(convert_to_url(im5.split('/')[-1]), stream=True).raw).resize(input_image_size))
-        Image6 = np.asarray(Image.open(requests.get(convert_to_url(im6.split('/')[-1]), stream=True).raw).resize(input_image_size))
+        input_image_size = Image.open(
+            requests.get(convert_to_url(im1.split("/")[-1]), stream=True).raw
+        ).size
+        Image1 = np.asarray(
+            Image.open(requests.get(convert_to_url(im1.split("/")[-1]), stream=True).raw)
+        )
+        Image2 = np.asarray(
+            Image.open(requests.get(convert_to_url(im2.split("/")[-1]), stream=True).raw).resize(
+                input_image_size
+            )
+        )
+        Image3 = np.asarray(
+            Image.open(requests.get(convert_to_url(im3.split("/")[-1]), stream=True).raw).resize(
+                input_image_size
+            )
+        )
+        Image4 = np.asarray(
+            Image.open(requests.get(convert_to_url(im4.split("/")[-1]), stream=True).raw).resize(
+                input_image_size
+            )
+        )
+        Image5 = np.asarray(
+            Image.open(requests.get(convert_to_url(im5.split("/")[-1]), stream=True).raw).resize(
+                input_image_size
+            )
+        )
+        Image6 = np.asarray(
+            Image.open(requests.get(convert_to_url(im6.split("/")[-1]), stream=True).raw).resize(
+                input_image_size
+            )
+        )
     # Adds a subplot at the 1st position
     fig.add_subplot(rows, columns, 2)
 
@@ -130,7 +157,9 @@ def display_recommended_products(im1, im2, im3, im4, im5, im6, simlarity_scores,
         return fig
 
 
-def display_recommended_products_one_row(im1, im2, im3, im4, im5, im6, simlarity_scores,product_id, save_image=True):
+def display_recommended_products_one_row(
+    im1, im2, im3, im4, im5, im6, simlarity_scores, product_id, save_image=True
+):
 
     # create figure
     fig = plt.figure(figsize=(10, 7))
@@ -202,7 +231,7 @@ def display_recommended_products_one_row(im1, im2, im3, im4, im5, im6, simlarity
             os.makedirs(cfg.RETURNED_IMAGE_DIR)
         plt.savefig(f"{cfg.RETURNED_IMAGE_DIR}/recommendation_{product_id}.png")
 
-        '''
+        """
         # save individual recommendation image
         input_img = Image.open(f"{cfg.DATASET_DIR}/{im1}")
         input_img.save(f"{cfg.RETURNED_IMAGE_DIR}/input_product.png")
@@ -210,7 +239,7 @@ def display_recommended_products_one_row(im1, im2, im3, im4, im5, im6, simlarity
         for i, im_path in enumerate([im2, im3, im4, im5, im6]):
             img = Image.open(f"{cfg.DATASET_DIR}/{im_path}").resize(input_img.size)
             img.save(f"{cfg.RETURNED_IMAGE_DIR}/recommendation_{i+1}.png")
-        '''
+        """
 
     else:
         return fig

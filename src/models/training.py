@@ -1,13 +1,11 @@
 import numpy as np
 import torch
 import torch.optim as optim
-import torchvision
 from src.config import config as cfg
 from src.dataset.Dataloader import FashionCompleteTheLookDataloader
 from src.models.Model import CompatibilityModel
-from src.utils.model_utils import init_weights
 from src.utils.image_utils import plot_learning_curves
-from torch.cuda.amp import GradScaler, autocast
+from src.utils.model_utils import init_weights
 from tqdm import tqdm
 
 torch.autograd.set_detect_anomaly(False)
@@ -44,7 +42,7 @@ def train_compatibility_model(num_epochs=1, batch_size=32):
 
         for i, (anchor, positive, negative) in enumerate(
             tqdm(train_dataloader, desc="Training", leave=False)
-        ):  
+        ):
             # set gradient accumulation to 0
             optimizer.zero_grad(set_to_none=True)
 
@@ -68,7 +66,11 @@ def train_compatibility_model(num_epochs=1, batch_size=32):
             # append batch loss to epoch loss
             if i % 100 == 0:
                 training_losses.append(loss.cpu().detach().numpy())
-                print("\nAvg Loss: {:.4f}, Step Loss: {:.4f}".format(np.mean(training_losses), training_losses[-1]))
+                print(
+                    "\nAvg Loss: {:.4f}, Step Loss: {:.4f}".format(
+                        np.mean(training_losses), training_losses[-1]
+                    )
+                )
 
         # save the trained model to the models directory
         torch.save(
@@ -79,6 +81,5 @@ def train_compatibility_model(num_epochs=1, batch_size=32):
 
 
 if __name__ == "__main__":
-    # train_compatibility_model(batch_size=cfg.BATCH_SIZE)
+    train_compatibility_model(batch_size=cfg.BATCH_SIZE)
     # plot learning curve
-    

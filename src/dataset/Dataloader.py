@@ -1,6 +1,7 @@
 import json
 import os
 import random
+
 import numpy as np
 import pandas as pd
 from src.config import config as cfg
@@ -228,8 +229,10 @@ class FashionCompleteTheLookDataloader:
             triplets = self.sample_triplets(image_meta_by_signature, image_meta_by_product_type)
 
             # set 90% full dataset to train and 10% to validation
-            data_type = np.array(["train"] *len(triplets))
-            validation_indices = random.choices(np.arange(len(triplets)), k = int(0.1*len(triplets)))
+            data_type = np.array(["train"] * len(triplets))
+            validation_indices = random.choices(
+                np.arange(len(triplets)), k=int(0.1 * len(triplets))
+            )
             data_type[validation_indices] = "validation"
             triplets["image_type"] = data_type
 
