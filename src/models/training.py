@@ -6,6 +6,7 @@ from src.config import config as cfg
 from src.dataset.Dataloader import FashionCompleteTheLookDataloader
 from src.models.Model import CompatibilityModel
 from src.utils.model_utils import init_weights
+from src.utils.image_utils import plot_learning_curves
 from torch.cuda.amp import GradScaler, autocast
 from tqdm import tqdm
 
@@ -14,7 +15,7 @@ torch.autograd.profiler.profile(False)
 torch.autograd.profiler.emit_nvtx(False)
 
 
-def train_compatibility_model(num_epochs=2, batch_size=32):
+def train_compatibility_model(num_epochs=1, batch_size=32):
 
     """train compatibility model with the triplets data"""
     model = CompatibilityModel()
@@ -34,16 +35,19 @@ def train_compatibility_model(num_epochs=2, batch_size=32):
     # compile the model, define loss and optimizer using JIT
 
     model = torch.jit.script(model).to(device)
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
-    criterion = torch.jit.script(torch.nn.TripletMarginLoss())
+    optimizer = optim.Adam(model.parameters(), lr=0.0005)
+    criterion = torch.jit.script(torch.nn.TripletMarginLoss(margin=0.2)).to(device)
+    training_losses = []
 
     # training loop
     for epoch in tqdm(range(num_epochs), desc="Epochs"):
 
-        loss_epoch = []
         for i, (anchor, positive, negative) in enumerate(
             tqdm(train_dataloader, desc="Training", leave=False)
-        ):
+        ):  
+            # set gradient accumulation to 0
+            optimizer.zero_grad(set_to_none=True)
+
             # send triplets to device
             anchor = anchor.to(device)
             positive = positive.to(device)
@@ -62,22 +66,17 @@ def train_compatibility_model(num_epochs=2, batch_size=32):
             optimizer.step()
 
             # append batch loss to epoch loss
-
-            if i % 20 == 0:
-                loss_epoch.append(loss.cpu().detach().numpy())
-                print("Loss: {:.4f}".format(loss.cpu().detach().numpy()))
-
-        # print training loss progress
-        print("Epoch: {}/{} - Loss: {:.4f}".format(epoch + 1, num_epochs, np.mean(loss_epoch)))
+            if i % 100 == 0:
+                training_losses.append(loss.cpu().detach().numpy())
+                print("\nAvg Loss: {:.4f}, Step Loss: {:.4f}".format(np.mean(training_losses), training_losses[-1]))
 
         # save the trained model to the models directory
         torch.save(
-            {
-                "model_state_dict": model.state_dict(),
-                "optimzier_state_dict": optimizer.state_dict(),
-            },
+            {"model_state_dict": model.state_dict()},
             f"{cfg.TRAINED_MODEL_DIR}/trained_compatibility_model_epoch{epoch}.pth",
         )
+        # plot learning curve
+        plot_learning_curves(train_losses)
 
 
 if __name__ == "__main__":

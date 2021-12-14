@@ -31,6 +31,13 @@ def convert_to_url(signature):
     prefix = "http://i.pinimg.com/400x/%s/%s/%s/%s"
     return prefix % (signature[0:2], signature[2:4], signature[4:6], signature)
 
+def plot_learning_curves(train_losses):
+    plt.figure(figsize=(10, 7))
+    plt.plot(train_losses)
+    plt.xlabel("epoch")
+    plt.ylabel("loss")
+    plt.title("Best Seq2seq Loss Curves")
+    plt.savefig(f"Compatible Product Embedding Loss.png")
 
 def display_recommended_products(im1, im2, im3, im4, im5, im6, simlarity_scores, save_image=True):
 

@@ -94,8 +94,12 @@ if __name__ == "__main__":
     # StyleEmbedding().similar_product_embedding(
     #     data_loader=FashionProductSTLDataloader().data_loader(), task_name="similar_product"
     # )
-
-    StyleEmbedding().compatible_product_embedding(
+    StyleEmbedding().similar_product_embedding(
         data_loader=FashionCompleteTheLookDataloader().single_data_loader(),
-        task_name="compatible_product",
+        task_name="similar_prod_CTL",
     )
+
+    # StyleEmbedding().compatible_product_embedding(
+    #     data_loader=FashionCompleteTheLookDataloader().single_data_loader(),
+    #     task_name="compatible_product",
+    # )
