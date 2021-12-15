@@ -34,8 +34,8 @@ def train_compatibility_model(num_epochs=1, batch_size=32):
     # compile the model, define loss and optimizer using JIT
 
     model = torch.jit.script(model).to(cfg.device)
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
-    criterion = torch.jit.script(torch.nn.TripletMarginLoss(margin=0.2)).to(cfg.device)
+    optimizer = optim.Adam(model.parameters(), lr=cfg.LERANING_RATE)
+    criterion = torch.jit.script(torch.nn.TripletMarginLoss(margin=cfg.MARGIN)).to(cfg.device)
     training_losses = []
     validation_losses = []
 
