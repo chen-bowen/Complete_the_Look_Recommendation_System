@@ -98,7 +98,7 @@ if __name__ == "__main__":
         product_id=random.randint(1, 454000)
     )
 
-    from utils.image_utils import display_recommended_products
+    from utils.image_utils import display_recommended_products, display_compatible_images
 
     # print(similar_recommendations)
     # display_recommended_products(
@@ -111,7 +111,17 @@ if __name__ == "__main__":
     # )
 
     print(compatible_recommendations)
-    display_recommended_products(
+    product_id = compatible_recommendations['input_product']['product_id']
+    im1 = compatible_recommendations['input_product']['image_single_signature']+".jpg"
+    im2 = compatible_recommendations['recommended_compatible_products'][0]['image_single_signature']+".jpg"
+    im3 = compatible_recommendations['recommended_compatible_products'][1]['image_single_signature']+".jpg"
+    im4 = compatible_recommendations['recommended_compatible_products'][2]['image_single_signature']+".jpg"
+    im5 = compatible_recommendations['recommended_compatible_products'][3]['image_single_signature']+".jpg"
+    im6 = compatible_recommendations['recommended_compatible_products'][4]['image_single_signature']+".jpg"
+
+    display_compatible_images(im1, im2, im3, im4, im5, im6, product_id, save_image=True)
+
+    '''display_recommended_products(
         compatible_recommendations["input_product"]["image_single_signature"],
         *[rec["image_path"] for rec in compatible_recommendations["recommended_products"]],
         [
@@ -119,4 +129,4 @@ if __name__ == "__main__":
             for rec in compatible_recommendations["recommended_products"]
         ],
         save_image=False,
-    )
+    )'''
