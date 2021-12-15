@@ -1,4 +1,5 @@
 import torch.nn as nn
+from src.config import config as cfg
 from torchvision import models
 
 
