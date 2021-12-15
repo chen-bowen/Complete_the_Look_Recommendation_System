@@ -17,18 +17,13 @@ def evaluation():
     data_loader=FashionCompleteTheLookDataloader(image_type="test").single_data_loader()
     
     embedding = StyleEmbedding()
-    
-    test_features = embedding.compatible_product_embedding(data_loader=data_loader,task_name="compatible_product_test")
-    
+    if not os.path.exists("features/cached_embeddings/compatible_product_test_embedding.pickle"):
+        test_features = embedding.compatible_product_embedding(data_loader=data_loader,task_name="compatible_product_test")
+    else:
+        with (open("features/cached_embeddings/compatible_product_test_embedding.pickle", "rb")) as file:
+            test_features = pickle.load(file)
+    breakpoint()
     # sim = calculate_similarity(features[0],features[8], "cosine")
-def check_image():
-    # 04fcde5521c0a404a4552329e5200673.jpg
-    # 04fcde5521c0a404a4552329e5200673_Shoes.jpg
-    dir_list = os.listdir("dataset/data/fashion_v2/train_single")
-    print(len(dir_list))
-    for image in dir_list:
-        if image == "04fcde5521c0a404a4552329e5200673.jpg":
-            print("here")
+
 if __name__ == "__main__":
     evaluation()
-    # check_image()
