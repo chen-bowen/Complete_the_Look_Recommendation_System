@@ -1,11 +1,12 @@
 import torch.nn as nn
+from src.config import config as cfg
 from torchvision import models
 
 
 class CompatibilityModel(nn.Module):
     """Custom model to measure compatibility between fashion products"""
 
-    def __init__(self, hidden_dim=256, emb_dim=128, dropout=0.4):
+    def __init__(self, hidden_dim=cfg.HIDDEN_DIM, emb_dim=cfg.EMBEDDING_DIM, dropout=cfg.DROPOUT):
         super(CompatibilityModel, self).__init__()
         # use resnet34 as base model
         self.create_base_model()

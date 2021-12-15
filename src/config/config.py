@@ -5,12 +5,15 @@ import torch
 
 PACKAGE_ROOT = pathlib.Path(src.__file__).resolve().parent
 
-BATCHES = 8
+VALIDATION_PCNT = 0.1
 
-BATCH_SIZE = 32
+BATCH_SIZE = 64
+NUM_EPOCHS = 1
+HIDDEN_DIM = 256
+EMBEDDING_DIM = 128
+DROPOUT = 0.4
 
-# RAW_DATA_FOLDER = PACKAGE_ROOT / "dataset/data/fashion"
-RAW_DATA_FOLDER = "dataset/data/fashion"
+RAW_DATA_FOLDER = PACKAGE_ROOT / "dataset/data/fashion"
 DATASET_DIR = PACKAGE_ROOT / "dataset"
 RETURNED_IMAGE_DIR = PACKAGE_ROOT / "images"
 TRAINED_MODEL_DIR = PACKAGE_ROOT / "models/trained_models"
