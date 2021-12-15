@@ -104,7 +104,7 @@ def get_images_complete_the_look(image_category, image_type):
     """Get images from CTL dataset given category (fashion/home) and type (scene/product)"""
     img_file_map = {
         "train": "./complete-the-look-dataset/datasets/raw_train.tsv",
-        "test": "./complete-the-look-dataset/datasets/raw_test.tsv",
+        "test": "dataset/data/complete-the-look-dataset/datasets/raw_test.tsv",
         "triplet_train_1": "./complete-the-look-dataset/datasets/triplet_train_p1.tsv",
         "triplet_train_2": "./complete-the-look-dataset/datasets/triplet_train_p2.tsv",
     }
