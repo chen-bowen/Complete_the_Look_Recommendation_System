@@ -231,7 +231,7 @@ class FashionCompleteTheLookDataloader:
             # set 90% full dataset to train and 10% to validation
             data_type = np.array(["train"] * len(triplets))
             validation_indices = random.choices(
-                np.arange(len(triplets)), k=int(0.1 * len(triplets))
+                np.arange(len(triplets)), k=int(cfg.VALIDATION_PCNT * len(triplets))
             )
             data_type[validation_indices] = "validation"
             triplets["image_type"] = data_type

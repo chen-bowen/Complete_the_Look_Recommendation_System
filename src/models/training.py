@@ -31,7 +31,7 @@ def train_compatibility_model(num_epochs=1, batch_size=32):
     # compile the model, define loss and optimizer using JIT
 
     model = torch.jit.script(model).to(cfg.device)
-    optimizer = optim.Adam(model.parameters(), lr=0.0005)
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
     criterion = torch.jit.script(torch.nn.TripletMarginLoss(margin=0.2)).to(cfg.device)
     training_losses = []
     validation_losses = []
@@ -101,5 +101,5 @@ def get_triplet_loss(anchor, positive, negative, criterion, model):
     return loss
 
 if __name__ == "__main__":
-    train_compatibility_model(batch_size=cfg.BATCH_SIZE)
+    train_compatibility_model(num_epochs=cfg.NUM_EPOCHS, batch_size=cfg.BATCH_SIZE)
     # plot learning curve
