@@ -56,7 +56,7 @@ def recommend_complementary_products(product_id, task_name="compatible_product",
     # get dataset metadata dataframe
     data_loader = FashionCompleteTheLookDataloader().single_data_loader()
     metadata = data_loader.dataset.metadata[
-        ["product_id", "image_single_signature", "product_type"]
+        ["product_id", "image_single_signature", "product_type", "image_path"]
     ]
 
     # get query feature from product id
@@ -93,40 +93,33 @@ def recommend_complementary_products(product_id, task_name="compatible_product",
 if __name__ == "__main__":
     import random
 
-    # similar_recommendations = recommend_similar_products(product_id=random.randint(1, 38000))
+    similar_recommendations = recommend_similar_products(product_id=random.randint(1, 38000))
     compatible_recommendations = recommend_complementary_products(
         product_id=random.randint(1, 454000)
     )
 
-    from utils.image_utils import display_recommended_products, display_compatible_images
+    from utils.image_utils import display_compatible_images, display_recommended_products
 
-    # print(similar_recommendations)
-    # display_recommended_products(
-    #     similar_recommendations["input_product"]["image_path"],
-    #     *[rec["image_path"] for rec in similar_recommendations["recommended_products"]],
-    #     [
-    #         round(rec["similarity_score"], 3)
-    #         for rec in similar_recommendations["recommended_products"]
-    #     ],
-    # )
+    print(similar_recommendations)
+    display_recommended_products(
+        similar_recommendations["input_product"]["image_path"],
+        *[rec["image_path"] for rec in similar_recommendations["recommended_products"]],
+        [
+            round(rec["similarity_score"], 3)
+            for rec in similar_recommendations["recommended_products"]
+        ],
+    )
 
     print(compatible_recommendations)
-    product_id = compatible_recommendations['input_product']['product_id']
-    im1 = compatible_recommendations['input_product']['image_single_signature']+".jpg"
-    im2 = compatible_recommendations['recommended_compatible_products'][0]['image_single_signature']+".jpg"
-    im3 = compatible_recommendations['recommended_compatible_products'][1]['image_single_signature']+".jpg"
-    im4 = compatible_recommendations['recommended_compatible_products'][2]['image_single_signature']+".jpg"
-    im5 = compatible_recommendations['recommended_compatible_products'][3]['image_single_signature']+".jpg"
-    im6 = compatible_recommendations['recommended_compatible_products'][4]['image_single_signature']+".jpg"
-
-    display_compatible_images(im1, im2, im3, im4, im5, im6, product_id, save_image=True)
-
-    '''display_recommended_products(
-        compatible_recommendations["input_product"]["image_single_signature"],
-        *[rec["image_path"] for rec in compatible_recommendations["recommended_products"]],
+    display_recommended_products(
+        compatible_recommendations["input_product"]["image_path"],
+        *[
+            rec["image_path"]
+            for rec in compatible_recommendations["recommended_compatible_products"]
+        ],
         [
             round(rec["compatibility_score"], 3)
-            for rec in compatible_recommendations["recommended_products"]
+            for rec in compatible_recommendations["recommended_compatible_products"]
         ],
-        save_image=False,
-    )'''
+        save_image=True,
+    )

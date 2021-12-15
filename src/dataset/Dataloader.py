@@ -265,11 +265,18 @@ class FashionCompleteTheLookDataloader:
             image_meta_df = pd.concat([image_meta_df, image_meta_test_df]).reset_index()
             image_meta_df["product_id"] = image_meta_df.index
 
+            # add image path
+            image_meta_df["image_path"] = image_meta_df.apply(
+                lambda row: f"./data/fashion_v2/{row['image_type']}_single/{row['image_single_signature']}.jpg",
+                axis=1,
+            )
+
             # save to csv
             image_meta_df[
                 [
                     "product_id",
                     "image_single_signature",
+                    "image_path",
                     "x",
                     "y",
                     "w",
