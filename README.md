@@ -19,8 +19,7 @@ The dataset used is the [shop the look dataset](https://github.com/kang205/STL-D
 #### Recommend Compatible Products
 1. Download data - Run `cd src/dataset/data` and run `python download_data.py`
 2. Train compatible model - Run `cd src` and run ` PYTHONPATH=../:. python models/training.py`
-3. Get compatible product embedding - Run `cd src`, make sure the in the `features/Embedding.py`, the class method `similar_product_embedding` is being selected, then run ` PYTHONPATH=../:. python features/Embedding.py` (be careful this could take up to 15 hours without the presence of a GPU, 7 hours with GPU)<img width="439" alt="image" src="https://user-images.githubusercontent.com/18410378/146463786-42b45e22-a884-41a7-9217-d56fa662195e.png">
-
+3. Get compatible product embedding - Run `cd src`, make sure the in the `features/Embedding.py`, the class method `similar_product_embedding` is being selected, then run ` PYTHONPATH=../:. python features/Embedding.py` (be careful this could take up to 15 hours without the presence of a GPU, 7 hours with GPU)<img 
 4. Evaluate the compatible model -  Run `cd src` and run ` PYTHONPATH=../:. python models/evaluate.py`
 5. Recommend Compatible Product - Run `cd src`, make sure the in the `recommend.py`, the function `recommend_compatible_products` is being selected, then run ` PYTHONPATH=../:. python recommend.py`
 
