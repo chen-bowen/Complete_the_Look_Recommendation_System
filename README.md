@@ -26,23 +26,13 @@ The dataset used is the [shop the look dataset](https://github.com/kang205/STL-D
 ## Results
 Samples of similar product recommendation
 
-<img width="421" alt="image" src="https://user-images.githubusercontent.com/18410378/146463805-778031ea-61c8-45dc-aa31-5e452cf891ee.png">
-<img width="421" alt="image" src="https://user-images.githubusercontent.com/18410378/146463816-877cb0f7-1d68-445f-adde-b47047f2743b.png">
-<img width="427" alt="image" src="https://user-images.githubusercontent.com/18410378/146463828-606311f5-2432-41c4-b208-53351644215d.png">
-<img width="427" alt="image" src="https://user-images.githubusercontent.com/18410378/146463834-00b73b3e-0350-411e-9c8c-074cc60feb8c.png">
-<img width="427" alt="image" src="https://user-images.githubusercontent.com/18410378/146463840-805759a3-3859-4821-806b-ec014f351630.png">
-<img width="427" alt="image" src="https://user-images.githubusercontent.com/18410378/146463849-88f06c87-2309-453a-8d34-fdeaaba93b78.png">
+<img width="500" alt="image" src="https://user-images.githubusercontent.com/18410378/146464288-d3960443-a616-49fc-b250-eadb1f751927.png">
+
 
 Samples of compatible product recommendation
 
-<img width="421" alt="image" src="https://user-images.githubusercontent.com/18410378/146463893-cc555b4d-e11b-4940-bfe1-32accc1db13f.png">
-<img width="402" alt="image" src="https://user-images.githubusercontent.com/18410378/146463909-b3371f7a-f5c1-4e6f-8693-346746beb8dd.png">
-<img width="403" alt="image" src="https://user-images.githubusercontent.com/18410378/146463921-6fa8a5d1-4ce1-46e5-a143-a607507a94ec.png">
-<img width="394" alt="image" src="https://user-images.githubusercontent.com/18410378/146463929-63b965b6-af1d-4299-bcb1-477afa5e3a5b.png">
-<img width="402" alt="image" src="https://user-images.githubusercontent.com/18410378/146463990-d66008c0-4859-4ee3-a608-9c18855c42d9.png">
-<img width="402" alt="image" src="https://user-images.githubusercontent.com/18410378/146464066-0633e173-9715-44e8-8d39-a1936b28d238.png">
 
-
+<img width="500" alt="image" src="https://user-images.githubusercontent.com/18410378/146464340-db108af4-ae66-409b-97fc-cb993c7a17bb.png">
 
 
 
