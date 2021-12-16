@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import torch
 import torch.optim as optim
@@ -13,7 +15,7 @@ torch.autograd.profiler.profile(False)
 torch.autograd.profiler.emit_nvtx(False)
 
 
-def train_compatibility_model(num_epochs=1, batch_size=32):
+def train_compatibility_model(starting_epoch=0, num_epochs=1, batch_size=32):
     """train compatibility model with the triplets data"""
     model = CompatibilityModel()
 
@@ -32,15 +34,23 @@ def train_compatibility_model(num_epochs=1, batch_size=32):
     model.train()
 
     # compile the model, define loss and optimizer using JIT
-
     model = torch.jit.script(model).to(cfg.device)
     optimizer = optim.Adam(model.parameters(), lr=cfg.LERANING_RATE)
     criterion = torch.jit.script(torch.nn.TripletMarginLoss(margin=cfg.MARGIN)).to(cfg.device)
     training_losses = []
     validation_losses = []
 
+    if os.path.exists(
+        f"{cfg.TRAINED_MODEL_DIR}/trained_compatibility_model_epoch{starting_epoch}.pth"
+    ):
+        checkpoint = torch.load(f"{cfg.TRAINED_MODEL_DIR}/trained_compatibility_model_epoch0.pth")
+        model.load_state_dict(checkpoint.get("model_state_dict"))
+        optimizer.load_state_dict(checkpoint.get("optimizer_state_dict"))
+        epoch = checkpoint.get("epoch", 0)
+        loss = checkpoint.get("loss")
+
     # training loop
-    for epoch in tqdm(range(num_epochs), desc="Epochs"):
+    for e in tqdm(range(num_epochs), desc="Epochs"):
 
         for i, (anchor, positive, negative) in enumerate(
             tqdm(train_dataloader, desc="Training", leave=False)
@@ -85,8 +95,13 @@ def train_compatibility_model(num_epochs=1, batch_size=32):
 
         # save the trained model to the models directory
         torch.save(
-            {"model_state_dict": model.state_dict()},
-            f"{cfg.TRAINED_MODEL_DIR}/trained_compatibility_model_epoch{epoch}.pth",
+            {
+                "model_state_dict": model.state_dict(),
+                "optimizer_state_dict": optimizer.state_dict(),
+                "loss": loss,
+                "epoch": e + starting_epoch,
+            },
+            f"{cfg.TRAINED_MODEL_DIR}/trained_compatibility_model_epoch{e + starting_epoch}.pth",
         )
         plot_learning_curves(training_losses, validation_losses)
 
