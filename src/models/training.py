@@ -15,7 +15,7 @@ torch.autograd.profiler.profile(False)
 torch.autograd.profiler.emit_nvtx(False)
 
 
-def train_compatibility_model(starting_epoch=0, num_epochs=1, batch_size=32):
+def train_compatibility_model(starting_epoch=0, num_epochs=2, batch_size=32):
     """train compatibility model with the triplets data"""
     model = CompatibilityModel()
 
@@ -45,9 +45,9 @@ def train_compatibility_model(starting_epoch=0, num_epochs=1, batch_size=32):
     ):
         checkpoint = torch.load(f"{cfg.TRAINED_MODEL_DIR}/trained_compatibility_model_epoch0.pth")
         model.load_state_dict(checkpoint.get("model_state_dict"))
-        optimizer.load_state_dict(checkpoint.get("optimizer_state_dict"))
-        epoch = checkpoint.get("epoch", 0)
-        loss = checkpoint.get("loss")
+        # optimizer.load_state_dict(checkpoint.get("optimizer_state_dict"))
+        # epoch = checkpoint.get("epoch", 0)
+        # loss = checkpoint.get("loss")
 
     # training loop
     for e in tqdm(range(num_epochs), desc="Epochs"):
@@ -103,7 +103,7 @@ def train_compatibility_model(starting_epoch=0, num_epochs=1, batch_size=32):
             },
             f"{cfg.TRAINED_MODEL_DIR}/trained_compatibility_model_epoch{e + starting_epoch}.pth",
         )
-        plot_learning_curves(training_losses, validation_losses)
+    plot_learning_curves(training_losses, validation_losses)
 
 
 def get_triplet_loss(anchor, positive, negative, criterion, model):
@@ -125,5 +125,5 @@ def get_triplet_loss(anchor, positive, negative, criterion, model):
 
 
 if __name__ == "__main__":
-    train_compatibility_model(num_epochs=cfg.NUM_EPOCHS, batch_size=cfg.BATCH_SIZE)
+    train_compatibility_model(starting_epoch=1, num_epochs=cfg.NUM_EPOCHS, batch_size=cfg.BATCH_SIZE)
     # plot learning curve
