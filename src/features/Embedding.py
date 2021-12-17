@@ -62,7 +62,7 @@ class StyleEmbedding:
         print("You are using device: %s" % cfg.device)
         model = CompatibilityModel()
         model.load_state_dict(
-            torch.load(f"{cfg.TRAINED_MODEL_DIR}/trained_compatibility_model_epoch0.pth")[
+            torch.load(f"{cfg.TRAINED_MODEL_DIR}/trained_compatibility_model_epoch2.pth")[
                 "model_state_dict"
             ]
         )
