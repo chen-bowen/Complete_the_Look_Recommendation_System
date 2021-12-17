@@ -28,13 +28,13 @@ The dataset used is the [shop the look dataset](https://github.com/kang205/STL-D
 ## Results
 Samples of similar product recommendation
 
-<img width="500" alt="image" src="https://user-images.githubusercontent.com/18410378/146464288-d3960443-a616-49fc-b250-eadb1f751927.png">
+<img width="750" alt="image" src="https://user-images.githubusercontent.com/18410378/146464288-d3960443-a616-49fc-b250-eadb1f751927.png">
 
 
 Samples of compatible product recommendation
 
 
-<img width="500" alt="image" src="https://user-images.githubusercontent.com/18410378/146464340-db108af4-ae66-409b-97fc-cb993c7a17bb.png">
+<img width="750" alt="image" src="https://user-images.githubusercontent.com/18410378/146464340-db108af4-ae66-409b-97fc-cb993c7a17bb.png">
 
 
 
