@@ -40,15 +40,17 @@ def train_compatibility_model(starting_epoch=0, num_epochs=2, batch_size=32):
     criterion = torch.jit.script(torch.nn.TripletMarginLoss(margin=cfg.MARGIN)).to(cfg.device)
     training_losses = []
     validation_losses = []
+    avg_training_losses = []
+    avg_validation_losses = []
 
     if os.path.exists(
-        f"{cfg.TRAINED_MODEL_DIR}/trained_compatibility_model_epoch{starting_epoch}.pth"
+        f"{cfg.TRAINED_MODEL_DIR}/trained_compatibility_model_epoch{starting_epoch - 1}.pth"
     ):
-        checkpoint = torch.load(f"{cfg.TRAINED_MODEL_DIR}/trained_compatibility_model_epoch0.pth")
+        checkpoint = torch.load(f"{cfg.TRAINED_MODEL_DIR}/trained_compatibility_model_epoch{starting_epoch - 1}.pth")
         model.load_state_dict(checkpoint.get("model_state_dict"))
-        # optimizer.load_state_dict(checkpoint.get("optimizer_state_dict"))
-        # epoch = checkpoint.get("epoch", 0)
-        # loss = checkpoint.get("loss")
+        optimizer.load_state_dict(checkpoint.get("optimizer_state_dict"))
+        epoch = checkpoint.get("epoch", 0)
+        loss = checkpoint.get("loss")
 
     # training loop
     for e in tqdm(range(num_epochs), desc="Epochs"):
@@ -69,8 +71,9 @@ def train_compatibility_model(starting_epoch=0, num_epochs=2, batch_size=32):
             # append batch loss to epoch loss
             if i % 100 == 0:
                 training_losses.append(loss.cpu().detach().numpy())
+                avg_training_losses.append(training_losses[-1])
                 # get validation loss
-                scheduler.step(train_loss)
+                scheduler.step(training_losses[-1])
                 model.eval()
                 with torch.no_grad():
                     try:
@@ -85,6 +88,7 @@ def train_compatibility_model(starting_epoch=0, num_epochs=2, batch_size=32):
                         anchor_val, positive_val, negative_val, criterion, model
                     )
                     validation_losses.append(loss_valid.cpu().detach().numpy())
+                    avg_validation_losses.append(validation_losses[-1])
 
                 print(
                     "\nAvg Training Loss: {:.4f}, Step Training Loss: {:.4f}, Avg Validation Loss: {:.4f}, Step Validation Loss: {:.4f}\n".format(
@@ -105,7 +109,7 @@ def train_compatibility_model(starting_epoch=0, num_epochs=2, batch_size=32):
             },
             f"{cfg.TRAINED_MODEL_DIR}/trained_compatibility_model_epoch{e + starting_epoch}.pth",
         )
-    plot_learning_curves(training_losses, validation_losses)
+    plot_learning_curves(avg_training_losses, avg_validation_losses)
 
 
 def get_triplet_loss(anchor, positive, negative, criterion, model):
@@ -127,5 +131,4 @@ def get_triplet_loss(anchor, positive, negative, criterion, model):
 
 
 if __name__ == "__main__":
-    train_compatibility_model(starting_epoch=2, num_epochs=cfg.NUM_EPOCHS, batch_size=cfg.BATCH_SIZE)
-    # plot learning curve
+    train_compatibility_model(starting_epoch=3, num_epochs=cfg.NUM_EPOCHS, batch_size=cfg.BATCH_SIZE)

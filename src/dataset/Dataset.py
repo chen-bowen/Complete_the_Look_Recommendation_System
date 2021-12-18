@@ -38,7 +38,6 @@ class FashionProductCTLTripletDataset(Dataset):
         self.data_type = data_type
         self.transform = transform
         self.metadata = pd.read_csv(metadata_file)
-
     def __len__(self):
         return len(self.metadata)
 
