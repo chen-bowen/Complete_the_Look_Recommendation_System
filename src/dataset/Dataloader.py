@@ -344,4 +344,4 @@ class FashionCompleteTheLookDataloader:
 if __name__ == "__main__":
     # dl = FashionProductSTLDataloader().data_loader()
     dl2 = FashionCompleteTheLookDataloader().triplet_data_loader()
-    # dl3 = FashionCompleteTheLookDataloader().single_data_loader()
+    dl3 = FashionCompleteTheLookDataloader().single_data_loader()
