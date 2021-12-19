@@ -26,7 +26,6 @@ class StyleEmbedding:
         """
 
         # get pretrain model and remove the classification layer
-        # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         print("You are using device: %s" % cfg.device)
         resnet = models.resnet18(pretrained=True).to(cfg.device)
         resnet.fc = nn.Identity()
@@ -58,7 +57,6 @@ class StyleEmbedding:
         """
 
         # get pretrain model and remove the classification layer
-
         print("You are using device: %s" % cfg.device)
         model = CompatibilityModel()
         model.load_state_dict(
@@ -92,13 +90,13 @@ class StyleEmbedding:
 
 
 if __name__ == "__main__":
-    # StyleEmbedding().similar_product_embedding(
-    #     data_loader=FashionProductSTLDataloader().data_loader(), task_name="similar_product"
-    # )
-    # StyleEmbedding().similar_product_embedding(
-    #     data_loader=FashionCompleteTheLookDataloader().single_data_loader(),
-    #     task_name="similar_prod_CTL",
-    # )
+    StyleEmbedding().similar_product_embedding(
+        data_loader=FashionProductSTLDataloader().data_loader(), task_name="similar_product"
+    )
+    StyleEmbedding().similar_product_embedding(
+        data_loader=FashionCompleteTheLookDataloader().single_data_loader(),
+        task_name="similar_prod_CTL",
+    )
 
     StyleEmbedding().compatible_product_embedding(
         data_loader=FashionCompleteTheLookDataloader(image_type="test").single_data_loader(),

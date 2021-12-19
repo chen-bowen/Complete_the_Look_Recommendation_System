@@ -8,7 +8,7 @@ PACKAGE_ROOT = pathlib.Path(src.__file__).resolve().parent
 VALIDATION_PCNT = 0.1
 
 BATCH_SIZE = 64
-NUM_EPOCHS = 2
+NUM_EPOCHS = 1
 HIDDEN_DIM = 256
 EMBEDDING_DIM = 128
 DROPOUT = 0.4

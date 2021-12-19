@@ -131,4 +131,4 @@ def get_triplet_loss(anchor, positive, negative, criterion, model):
 
 
 if __name__ == "__main__":
-    train_compatibility_model(starting_epoch=3, num_epochs=cfg.NUM_EPOCHS, batch_size=cfg.BATCH_SIZE)
+    train_compatibility_model(starting_epoch=5, num_epochs=cfg.NUM_EPOCHS, batch_size=cfg.BATCH_SIZE)
