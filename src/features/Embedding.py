@@ -68,9 +68,9 @@ class StyleEmbedding:
         model.eval()
         transforms = torchvision.transforms.Resize(256)
         all_features = []
-        
+
         for batch in tqdm.tqdm(data_loader):
-            
+
             X = transforms(batch)  # resizes to 256 X 256 for ResNet
             X = X.float().to(cfg.device)
             with torch.no_grad():
@@ -102,7 +102,6 @@ if __name__ == "__main__":
         data_loader=FashionCompleteTheLookDataloader(image_type="test").single_data_loader(),
         task_name="compatible_product_test",
     )
-
 
     StyleEmbedding().compatible_product_embedding(
         data_loader=FashionCompleteTheLookDataloader().single_data_loader(),

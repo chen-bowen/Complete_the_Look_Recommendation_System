@@ -46,7 +46,9 @@ def train_compatibility_model(starting_epoch=0, num_epochs=2, batch_size=32):
     if os.path.exists(
         f"{cfg.TRAINED_MODEL_DIR}/trained_compatibility_model_epoch{starting_epoch - 1}.pth"
     ):
-        checkpoint = torch.load(f"{cfg.TRAINED_MODEL_DIR}/trained_compatibility_model_epoch{starting_epoch - 1}.pth")
+        checkpoint = torch.load(
+            f"{cfg.TRAINED_MODEL_DIR}/trained_compatibility_model_epoch{starting_epoch - 1}.pth"
+        )
         model.load_state_dict(checkpoint.get("model_state_dict"))
         optimizer.load_state_dict(checkpoint.get("optimizer_state_dict"))
         epoch = checkpoint.get("epoch", 0)
@@ -131,4 +133,6 @@ def get_triplet_loss(anchor, positive, negative, criterion, model):
 
 
 if __name__ == "__main__":
-    train_compatibility_model(starting_epoch=5, num_epochs=cfg.NUM_EPOCHS, batch_size=cfg.BATCH_SIZE)
+    train_compatibility_model(
+        starting_epoch=5, num_epochs=cfg.NUM_EPOCHS, batch_size=cfg.BATCH_SIZE
+    )
