@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import torch
 
 import numpy as np
 import pandas as pd
@@ -71,7 +72,8 @@ class FashionProductSTLDataloader:
         transformations = transforms.Compose(
             [
                 transforms.Resize((cfg.HEIGHT, cfg.WIDTH)),
-                transforms.ToTensor(),
+                transforms.PILToTensor(),
+                transforms.ConvertImageDtype(torch.float),
                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
             ]
         )
@@ -93,7 +95,7 @@ SKIP_IF_POS_SAME_CATEGORY_AS_ANCHOR = (
 
 
 class FashionCompleteTheLookDataloader:
-    def __init__(self, image_type="train", batch_size=cfg.BATCH_SIZE, num_workers=8):
+    def __init__(self, image_type="train", batch_size=cfg.BATCH_SIZE, num_workers=10):
         self.image_type = image_type
         self.batch_size = batch_size
         self.num_workers = num_workers
@@ -294,7 +296,8 @@ class FashionCompleteTheLookDataloader:
         transformations = transforms.Compose(
             [
                 transforms.Resize((cfg.HEIGHT, cfg.WIDTH)),
-                transforms.ToTensor(),
+                transforms.PILToTensor(),
+                transforms.ConvertImageDtype(torch.float),
                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
             ]
         )
@@ -320,7 +323,8 @@ class FashionCompleteTheLookDataloader:
         transformations = transforms.Compose(
             [
                 transforms.Resize((cfg.HEIGHT, cfg.WIDTH)),
-                transforms.ToTensor(),
+                transforms.PILToTensor(),
+                transforms.ConvertImageDtype(torch.float),
                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
             ]
         )

@@ -71,7 +71,7 @@ def train_compatibility_model(starting_epoch=0, num_epochs=2, batch_size=32):
             # append batch loss to epoch loss
             if i % 100 == 0:
                 training_losses.append(loss.cpu().detach().numpy())
-                avg_training_losses.append(training_losses[-1])
+                avg_training_losses.append(np.mean(training_losses))
                 # get validation loss
                 scheduler.step(training_losses[-1])
                 model.eval()
@@ -88,7 +88,7 @@ def train_compatibility_model(starting_epoch=0, num_epochs=2, batch_size=32):
                         anchor_val, positive_val, negative_val, criterion, model
                     )
                     validation_losses.append(loss_valid.cpu().detach().numpy())
-                    avg_validation_losses.append(validation_losses[-1])
+                    avg_validation_losses.append(np.mean(validation_losses))
 
                 print(
                     "\nAvg Training Loss: {:.4f}, Step Training Loss: {:.4f}, Avg Validation Loss: {:.4f}, Step Validation Loss: {:.4f}\n".format(
