@@ -1,0 +1,8 @@
+# Data download config for STL and CTL datasets.
+# Run download from src/dataset/data/ directory.
+
+stl_categories: ["fashion"]
+stl_types: ["product"]
+ctl_category: "fashion_v2"
+ctl_types: ["train", "test"]
+max_workers: 5

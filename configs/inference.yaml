@@ -1,0 +1,6 @@
+# Inference config for recommenders.
+# Embedding paths are under PACKAGE_ROOT/features/cached_embeddings/.
+
+similar_task_name: "similar_product"
+compatible_task_name: "compatible_product"
+top_n: 5

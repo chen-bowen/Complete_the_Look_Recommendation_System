@@ -1,82 +1,138 @@
-import os
-import pickle
+"""Evaluation for compatibility model.
 
-import config as cfg
+CompatibilityEvaluator: Sample triplets from test set, compute accuracy
+(anchor-positive closer than anchor-negative).
+"""
+
+import pickle
+from pathlib import Path
+
 import pandas as pd
 import torch
-from features.Embedding import StyleEmbedding
+
+from src.config import config as cfg
+from src.features.Embedding import CompatibleProductEmbedder
 from src.dataset.Dataloader import FashionCompleteTheLookDataloader
-from utils.similarity import calculate_similarity
+from src.utils.similarity import calculate_similarity
 
 
-def evaluation():
+class CompatibilityEvaluator:
+    """Evaluate compatibility model on test triplets.
+
+    For each outfit: sample anchor, positive (same outfit, different category),
+    negative (same category, different outfit). Correct if sim(anchor, pos) > sim(anchor, neg).
     """
-    Method: Randomly pick a product (anchor), find a product within the same image of a different category (positive),
-    find a different product of the same category but from a different image (negative), if the score for anchor-positive
-    is higher than score for anchor-negative, then it is deemed to be correct.
-    """
 
-    # read in the metadata file
-    metadata = pd.read_csv("dataset/metadata/dataset_metadata_ctl_single.csv")
-    metadata_test = metadata[metadata["image_type"] == "test"]
-    metadata_test.loc[:, "product_id"] = metadata_test.reset_index().index.to_list()
-    data_loader = FashionCompleteTheLookDataloader(image_type="test").single_data_loader()
+    def __init__(
+        self,
+        model_path: Path | str | None = None,
+        embedding_path: Path | str | None = None,
+        metadata_path: Path | str | None = None,
+    ):
+        """Initialize evaluator.
 
-    # load in the embedding
-    embedding = StyleEmbedding()
-    if not os.path.exists("features/cached_embeddings/compatible_product_test_embedding.pickle"):
-        test_features = embedding.compatible_product_embedding(
-            data_loader=data_loader, task_name="compatible_product_test"
+        Args:
+            model_path: Path to CompatibilityModel checkpoint. Used to compute embeddings if not cached.
+            embedding_path: Path to cached test embeddings. If exists, skips model inference.
+            metadata_path: Path to dataset_metadata_ctl_single.csv.
+        """
+        self.model_path = Path(model_path) if model_path else None
+        self.embedding_path = Path(
+            embedding_path
+            or cfg.PACKAGE_ROOT
+            / "features/cached_embeddings"
+            / "compatible_product_test_embedding.pickle"
         )
-    else:
-        with (
-            open("features/cached_embeddings/compatible_product_test_embedding.pickle", "rb")
-        ) as file:
-            test_features = pickle.load(file)
+        self.metadata_path = Path(
+            metadata_path
+            or cfg.DATASET_DIR / "metadata" / "dataset_metadata_ctl_single.csv"
+        )
+        self._test_features: torch.Tensor | None = None
+        self._metadata_test: pd.DataFrame | None = None
 
-    # get original image signature
-    metadata_test["original_image_signature"] = metadata_test["image_single_signature"].apply(
-        lambda row: row.split("_")[0]
-    )
-
-    # generate a set of triplets that could be used for evaluation
-    triplets = []
-    for signature in metadata_test["original_image_signature"].unique():
-        # sample anchor image
-        image_src = metadata_test[metadata_test["original_image_signature"] == signature]
-
-        anchor = image_src.sample(1).to_dict(orient="records")[0]
-
-        # sample positive image
-        positive = (
-            image_src[image_src["product_type"] != anchor["product_type"]]
-            .sample(1)
-            .to_dict(orient="records")[0]
+    def _load_embeddings(self) -> None:
+        """Load or compute test embeddings."""
+        if self._test_features is not None:
+            return
+        if self.embedding_path.exists():
+            with open(self.embedding_path, "rb") as f:
+                self._test_features = pickle.load(f)
+            return
+        # Compute embeddings
+        data_loader = FashionCompleteTheLookDataloader(
+            image_type="test"
+        ).single_data_loader()
+        embedder = CompatibleProductEmbedder(
+            model_path=self.model_path or cfg.TRAINED_MODEL_DIR
+        )
+        self._test_features = embedder.extract(
+            data_loader,
+            task_name="compatible_product_test",
+            save_path=self.embedding_path,
         )
 
-        # sample negative image
-        negative_image_src = metadata_test[
-            (metadata_test["product_type"] == positive["product_type"])
-            & (metadata_test["original_image_signature"] != positive["original_image_signature"])
-        ]
-        negative = negative_image_src.sample(1).to_dict(orient="records")[0]
-        triplets.append((anchor, positive, negative))
+    def _load_metadata(self) -> None:
+        """Load and prepare test metadata."""
+        if self._metadata_test is not None:
+            return
+        metadata = pd.read_csv(self.metadata_path)
+        self._metadata_test = metadata[metadata["image_type"] == "test"].copy()
+        self._metadata_test["product_id"] = self._metadata_test.reset_index().index
+        self._metadata_test["original_image_signature"] = (
+            self._metadata_test["image_single_signature"].str.split("_").str[0]
+        )
 
-    # if the embedding for postive is closer to anchor than negative, add 1 to correct
-    total_score = 0
-    for anchor, positive, negative in triplets:
-        anchor_feat = test_features[anchor["product_id"], :].unsqueeze(0)
-        positive_feat = test_features[positive["product_id"], :].unsqueeze(0)
-        negative_feat = test_features[negative["product_id"], :].unsqueeze(0)
+    def evaluate(self) -> float:
+        """Compute accuracy: fraction of triplets where anchor-positive > anchor-negative.
 
-        sim_ap = calculate_similarity(anchor_feat, positive_feat, sim_function="cosine")
-        sim_an = calculate_similarity(anchor_feat, negative_feat, sim_function="cosine")
-        if sim_ap > sim_an:
-            total_score += 1
+        Returns:
+            Accuracy in [0, 1].
+        """
+        self._load_embeddings()
+        self._load_metadata()
+        triplets = self._sample_triplets()
+        correct = 0
+        for anchor, positive, negative in triplets:
+            a_feat = self._test_features[anchor["product_id"], :].unsqueeze(0)
+            p_feat = self._test_features[positive["product_id"], :].unsqueeze(0)
+            n_feat = self._test_features[negative["product_id"], :].unsqueeze(0)
+            sim_ap = calculate_similarity(a_feat, p_feat, sim_function="cosine")
+            sim_an = calculate_similarity(a_feat, n_feat, sim_function="cosine")
+            if sim_ap > sim_an:
+                correct += 1
+        return correct / len(triplets) if triplets else 0.0
 
-    return total_score / len(triplets)
+    def _sample_triplets(self) -> list[tuple[dict, dict, dict]]:
+        """Sample (anchor, positive, negative) triplets from test metadata."""
+        triplets = []
+        for sig in self._metadata_test["original_image_signature"].unique():
+            image_src = self._metadata_test[
+                self._metadata_test["original_image_signature"] == sig
+            ]
+            anchor = image_src.sample(1).to_dict(orient="records")[0]
+            pos_candidates = image_src[
+                image_src["product_type"] != anchor["product_type"]
+            ]
+            if pos_candidates.empty:
+                continue
+            positive = pos_candidates.sample(1).to_dict(orient="records")[0]
+            neg_candidates = self._metadata_test[
+                (self._metadata_test["product_type"] == positive["product_type"])
+                & (self._metadata_test["original_image_signature"] != sig)
+            ]
+            if neg_candidates.empty:
+                continue
+            negative = neg_candidates.sample(1).to_dict(orient="records")[0]
+            triplets.append((anchor, positive, negative))
+        return triplets
+
+
+def evaluation() -> float:
+    """Legacy entry point: run CompatibilityEvaluator and return accuracy."""
+    evaluator = CompatibilityEvaluator()
+    return evaluator.evaluate()
 
 
 if __name__ == "__main__":
-    correct_pcnt = evaluation()
-    print(f"The correct percentage of the compatibility test is {correct_pcnt}")
+    accuracy = evaluation()
+    print(f"The correct percentage of the compatibility test is {accuracy}")

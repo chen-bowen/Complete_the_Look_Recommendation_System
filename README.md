@@ -7,6 +7,17 @@ Building a comprehensive recommendation system prototype for online ecommerce. P
 With the accelerated online eCommerce scene driven by the contactless shopping style in recent years, having a great recommendation system is essential to the business' success. However, it has always been challenging to provide any meaningful recommendations with the absence of user interaction history, known as the cold start problem.  In this project, we attempted to create a comprehensive recommendation system that recommends both similar and complementary products using the power of deep learning and visual embeddings, which would effectively recommend products without need any knowledge of user preferences, user history, item propensity, or any other data.
 
 
+## Setup
+
+This project uses [uv](https://docs.astral.sh/uv/) for dependency management.
+
+```bash
+# Install uv (if needed): curl -LsSf https://astral.sh/uv/install.sh | sh
+uv sync
+```
+
+Activate the virtual environment: `source .venv/bin/activate` (or use `uv run` which auto-uses it).
+
 ## Datasets
 
 The dataset used is the [shop the look dataset](https://github.com/kang205/STL-Dataset) and the [complete the look dataset](https://github.com/eileenforwhat/complete-the-look-dataset) from Pinterest. Thank you for kindly sharing these great data sources to make this project possible.
@@ -14,16 +25,17 @@ The dataset used is the [shop the look dataset](https://github.com/kang205/STL-D
 ## Quick Run Instructions
 
 #### Recommend Similar Products
-1. Download data - Run `cd src/dataset/data` and run `python download_data.py`
-2. Get similar product embedding - Run `cd src`, make sure the in the `features/Embedding.py`, the class method `similar_product_embedding` is being selected, then run ` PYTHONPATH=../:. python features/Embedding.py` (be careful this could take up to 2 hours without the presence of a GPU)
-3. Recommend Similar Product - Run `cd src`, make sure the in the `recommend.py`, the function `recommend_similar_products` is being selected, then run ` PYTHONPATH=../:. python recommend.py`
+1. Download data: `uv run python -m src.dataset.data.download_data --ctl-test` (or `--stl` for STL)
+2. Get similar product embedding: `uv run python -m src.features.Embedding` (2+ hours without GPU)
+3. Recommend similar products: `uv run python -m src.recommend`
+4. Streamlit UI: `uv run streamlit run streamlit_app.py`
 
 #### Recommend Compatible Products
-1. Download data - Run `cd src/dataset/data` and run `python download_data.py`
-2. Train compatible model - Run `cd src` and run ` PYTHONPATH=../:. python models/training.py`
-3. Get compatible product embedding - Run `cd src`, make sure the in the `features/Embedding.py`, the class method `similar_product_embedding` is being selected, then run ` PYTHONPATH=../:. python features/Embedding.py` (be careful this could take up to 15 hours without the presence of a GPU, 7 hours with GPU)<img 
-4. Evaluate the compatible model -  Run `cd src` and run ` PYTHONPATH=../:. python models/evaluate.py`
-5. Recommend Compatible Product - Run `cd src`, make sure the in the `recommend.py`, the function `recommend_compatible_products` is being selected, then run ` PYTHONPATH=../:. python recommend.py`
+1. Download data: `uv run python -m src.dataset.data.download_data --ctl-train --ctl-test`
+2. Train compatible model: `uv run python -m src.models.training`
+3. Get compatible product embedding: `uv run python -m src.features.Embedding` (see `__main__` in Embedding.py)
+4. Evaluate: `uv run python -m src.models.evaluate`
+5. Recommend compatible products: `uv run python -m src.recommend` (select `recommend_complementary_products` in `__main__`)
 
 ## Results
 Samples of similar product recommendation

@@ -1,0 +1,44 @@
+ [project]
+ name = "complete-the-look"
+ version = "0.1.0"
+ description = "Complete the Look visual recommendation system (similar + compatible fashion products)."
+ requires-python = ">=3.10"
+ authors = [
+   { name = "Bowen Chen" }
+ ]
+ readme = "README.md"
+ license = { text = "MIT" }
+
+ dependencies = [
+   "torch>=2.0.0,<2.5.0",
+   "torchvision>=0.15.0,<0.20.0",
+   "torchaudio>=2.0.0,<2.5.0",
+   "numpy",
+   "pandas",
+   "pillow",
+   "scipy",
+   "matplotlib",
+   "tqdm",
+   "pyyaml",
+   "streamlit",
+   "requests",
+   "pre-commit>=4.5.1",
+]
+
+ [project.optional-dependencies]
+ dev = [
+   "ipykernel",
+   "black",
+   "ruff",
+ ]
+
+ [project.urls]
+ "Homepage" = "https://github.com/chen-bowen/Complete_the_Look_Recommendation_System"
+
+ [tool.uv]
+ # Use managed Python (arm64 on M-series Macs) so PyTorch wheels install correctly
+ python-preference = "managed"
+
+ [tool.uv.sources]
+ complete-the-look = { path = ".", editable = true }
+

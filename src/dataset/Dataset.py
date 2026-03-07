@@ -1,4 +1,3 @@
-import ast
 import os
 
 import pandas as pd
@@ -13,7 +12,9 @@ class FashionProductSTLDataset(Dataset):
         self.metadata = (
             pd.read_csv(metadata_file)
             if not subset
-            else pd.read_csv(metadata_file)[pd.read_csv(metadata_file)["image_type"] == subset]
+            else pd.read_csv(metadata_file)[
+                pd.read_csv(metadata_file)["image_type"] == subset
+            ]
         )
         self.transform = transform
 
@@ -21,10 +22,11 @@ class FashionProductSTLDataset(Dataset):
         return len(self.metadata)
 
     def __getitem__(self, index):
-        img_id = self.metadata.iloc[index, 0]
-        img = Image.open(
-            os.path.join(cfg.PACKAGE_ROOT, "dataset/", self.metadata.loc[img_id, "image_path"])
-        ).convert("RGB")
+        img_row = self.metadata.iloc[index]
+        image_path = img_row["image_path"]
+        img = Image.open(os.path.join(cfg.PACKAGE_ROOT, "dataset", image_path)).convert(
+            "RGB"
+        )
 
         if self.transform is not None:
             img = self.transform(img)
@@ -45,7 +47,9 @@ class FashionProductCTLTripletDataset(Dataset):
     def __getitem__(self, index):
 
         triplet_id = self.metadata.reset_index().iloc[index, 0]
-        data_src_folder = "train" if self.data_type in ["train", "validation"] else "test"
+        data_src_folder = (
+            "train" if self.data_type in ["train", "validation"] else "test"
+        )
         # get the anchor, postive and negative image and save to img triplets
         img_triplets = []
         for img_type in ["anchor", "pos", "neg"]:
@@ -99,13 +103,14 @@ class FashionProductCTLSingleDataset(Dataset):
                     self.metadata.loc[img_id, "image_single_signature"] + ".jpg",
                 )
             ).convert("RGB")
-        except:
+        except Exception:
             img_src = Image.open(
                 os.path.join(
                     cfg.PACKAGE_ROOT,
                     "dataset/data/fashion_v2/",
                     f"{self.data_type}",
-                    self.metadata.loc[img_id, "image_single_signature"].split("_")[0] + ".jpg",
+                    self.metadata.loc[img_id, "image_single_signature"].split("_")[0]
+                    + ".jpg",
                 )
             )
             bounding_box = self.metadata.iloc[img_id, 2:6].to_list()

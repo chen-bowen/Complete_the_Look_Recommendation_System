@@ -1,0 +1,15 @@
+# Training config for CompatibilityModel (triplet loss).
+# Override with --config path/to/other.yaml when running training.
+
+batch_size: 64
+num_epochs: 1
+starting_epoch: 0
+learning_rate: 0.0001
+margin: 1.0
+hidden_dim: 256
+embedding_dim: 128
+dropout: 0.4
+validation_pcnt: 0.1
+
+# Paths (relative to project root or absolute)
+save_dir: "src/models/trained_models"

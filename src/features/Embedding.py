@@ -1,109 +1,177 @@
+"""Feature extractors for similar and compatible product embeddings.
+
+SimilarProductEmbedder: ResNet-18 features for similarity (same-category).
+CompatibleProductEmbedder: CompatibilityModel features for complementarity.
+"""
+
 import pickle
+from pathlib import Path
 
 import torch
 import torch.nn as nn
 import torchvision
 import tqdm
+from torchvision.models import ResNet18_Weights, resnet18
+
 from src.config import config as cfg
-from src.dataset.Dataloader import FashionCompleteTheLookDataloader, FashionProductSTLDataloader
+from src.dataset.Dataloader import (
+    FashionCompleteTheLookDataloader,
+    FashionProductSTLDataloader,
+)
 from src.models.Model import CompatibilityModel
-from torchvision import models
 
 
-class StyleEmbedding:
-    """
-    Feature extractor that generates different features according to data_loader and task
-    """
+class SimilarProductEmbedder:
+    """Extract ResNet-18 features for similar-product (same-category) retrieval."""
 
-    def __init__(self):
-        pass
+    def __init__(self, device: torch.device | None = None):
+        """Initialize embedder.
 
-    def similar_product_embedding(self, data_loader, task_name="similar_product"):
+        Args:
+            device: Device for inference. Defaults to cfg.device.
         """
-        Import data loader with the batches. Go through each batch and pass through ResNet. Features are extracted from
-        the last layer for each image in each batch. At the very end each batch is stacked and you are left with tensor
-        "all_features" of shape (batches,batch_size,features)
-        """
+        self.device = device or cfg.device
 
-        # get pretrain model and remove the classification layer
-        print("You are using device: %s" % cfg.device)
-        resnet = models.resnet18(pretrained=True).to(cfg.device)
+    def extract(
+        self,
+        data_loader,
+        task_name: str = "similar_product",
+        save_path: Path | None = None,
+    ) -> torch.Tensor:
+        """Extract features for all images in the data loader.
+
+        Args:
+            data_loader: PyTorch DataLoader yielding image batches.
+            task_name: Name for cached pickle file.
+            save_path: Override save path. Default: CACHED_EMBEDDINGS_DIR/{task_name}_embedding.pickle.
+
+        Returns:
+            Tensor of shape (N, 512) with features on CPU.
+        """
+        print(f"You are using device: {self.device}")
+        resnet = resnet18(weights=ResNet18_Weights.IMAGENET1K_V1).to(self.device)
         resnet.fc = nn.Identity()
         resnet.eval()
-        transforms = torchvision.transforms.Resize(256)
+        transform = torchvision.transforms.Resize(256)
         all_features = []
 
-        for batch in tqdm.tqdm(data_loader):
-            X = transforms(batch)  # resizes to 256 X 256 for ResNet
-            X = X.float().to(cfg.device)
+        for batch in tqdm.tqdm(data_loader, desc=f"Extract {task_name}"):
+            X = transform(batch)
+            X = X.float().to(self.device)
             with torch.no_grad():
                 batch_features = resnet(X)
                 all_features.append(batch_features)
 
         all_features = torch.cat(all_features).to("cpu")
-
-        # save all features to a pickle file
-        with open(
-            f"{cfg.PACKAGE_ROOT}/features/cached_embeddings/{task_name}_embedding.pickle", "wb"
-        ) as handle:
-            pickle.dump(all_features, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        out_path = save_path or (
+            cfg.PACKAGE_ROOT
+            / "features/cached_embeddings"
+            / f"{task_name}_embedding.pickle"
+        )
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(out_path, "wb") as f:
+            pickle.dump(all_features, f, protocol=pickle.HIGHEST_PROTOCOL)
         return all_features
 
-    def compatible_product_embedding(self, data_loader, task_name):
-        """
-        Import data loader with the batches. Go through each batch and pass through ComaptibilityModel. Features are extracted from
-        the last layer for each image in each batch. At the very end each batch is stacked and you are left with tensor
-        "all_features" of shape (batches,batch_size,features)
-        """
 
-        # get pretrain model and remove the classification layer
-        print("You are using device: %s" % cfg.device)
-        model = CompatibilityModel()
-        model.load_state_dict(
-            torch.load(f"{cfg.TRAINED_MODEL_DIR}/trained_compatibility_model_epoch5.pth")[
-                "model_state_dict"
-            ]
+class CompatibleProductEmbedder:
+    """Extract CompatibilityModel features for compatible-product (cross-category) retrieval."""
+
+    def __init__(
+        self,
+        model_path: Path | str | None = None,
+        device: torch.device | None = None,
+    ):
+        """Initialize embedder.
+
+        Args:
+            model_path: Path to checkpoint or directory. Default: latest in TRAINED_MODEL_DIR.
+            device: Device for inference. Defaults to cfg.device.
+        """
+        self.model_path = Path(model_path) if model_path else None
+        self.device = device or cfg.device
+
+    def extract(
+        self,
+        data_loader,
+        task_name: str,
+        save_path: Path | None = None,
+    ) -> torch.Tensor:
+        """Extract compatibility features for all images.
+
+        Args:
+            data_loader: PyTorch DataLoader yielding image batches.
+            task_name: Name for cached pickle file.
+            save_path: Override save path.
+
+        Returns:
+            Tensor of shape (N, embedding_dim) with features on CPU.
+        """
+        print(f"You are using device: {self.device}")
+        model = CompatibilityModel.from_pretrained(
+            self.model_path or cfg.TRAINED_MODEL_DIR,
+            device=self.device,
         )
-        model.to(cfg.device)
         model.eval()
-        transforms = torchvision.transforms.Resize(256)
+        transform = torchvision.transforms.Resize(256)
         all_features = []
 
-        for batch in tqdm.tqdm(data_loader):
-
-            X = transforms(batch)  # resizes to 256 X 256 for ResNet
-            X = X.float().to(cfg.device)
+        for batch in tqdm.tqdm(data_loader, desc=f"Extract {task_name}"):
+            X = transform(batch)
+            X = X.float().to(self.device)
             with torch.no_grad():
                 batch_features = model(X)
                 all_features.append(batch_features)
 
-        all_features = torch.cat(all_features).to(
-            "cpu"
-        )  # send it to cpu for the pickle to be read properly
-
-        # save all features to a pickle file
-        with open(
-            f"{cfg.PACKAGE_ROOT}/features/cached_embeddings/{task_name}_embedding.pickle", "wb"
-        ) as handle:
-            pickle.dump(all_features, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        all_features = torch.cat(all_features).to("cpu")
+        out_path = save_path or (
+            cfg.PACKAGE_ROOT
+            / "features/cached_embeddings"
+            / f"{task_name}_embedding.pickle"
+        )
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(out_path, "wb") as f:
+            pickle.dump(all_features, f, protocol=pickle.HIGHEST_PROTOCOL)
         return all_features
 
 
+# --- Backward compatibility ---
+class StyleEmbedding:
+    """Legacy facade: delegates to SimilarProductEmbedder and CompatibleProductEmbedder."""
+
+    def __init__(self):
+        self._similar = SimilarProductEmbedder()
+        self._compatible = CompatibleProductEmbedder()
+
+    def similar_product_embedding(
+        self, data_loader, task_name: str = "similar_product"
+    ):
+        """Extract similar-product features (ResNet-18)."""
+        return self._similar.extract(data_loader, task_name=task_name)
+
+    def compatible_product_embedding(self, data_loader, task_name: str):
+        """Extract compatible-product features (CompatibilityModel)."""
+        return self._compatible.extract(data_loader, task_name=task_name)
+
+
 if __name__ == "__main__":
-    StyleEmbedding().similar_product_embedding(
-        data_loader=FashionProductSTLDataloader().data_loader(), task_name="similar_product"
+    similar = SimilarProductEmbedder()
+    similar.extract(
+        data_loader=FashionProductSTLDataloader().data_loader(),
+        task_name="similar_product",
     )
-    StyleEmbedding().similar_product_embedding(
+    similar.extract(
         data_loader=FashionCompleteTheLookDataloader().single_data_loader(),
         task_name="similar_prod_CTL",
     )
-
-    StyleEmbedding().compatible_product_embedding(
-        data_loader=FashionCompleteTheLookDataloader(image_type="test").single_data_loader(),
+    compatible = CompatibleProductEmbedder()
+    compatible.extract(
+        data_loader=FashionCompleteTheLookDataloader(
+            image_type="test"
+        ).single_data_loader(),
         task_name="compatible_product_test",
     )
-
-    StyleEmbedding().compatible_product_embedding(
+    compatible.extract(
         data_loader=FashionCompleteTheLookDataloader().single_data_loader(),
         task_name="compatible_product",
     )

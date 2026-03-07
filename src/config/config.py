@@ -1,24 +1,55 @@
+"""Configuration and constants for the Complete the Look project.
+
+Re-exports from src.constants for backward compatibility. Use load_config()
+to load YAML configs for training, inference, or data prep.
+"""
+
 import pathlib
+from typing import Any
 
-import src
-import torch
+from src import constants
 
-PACKAGE_ROOT = pathlib.Path(src.__file__).resolve().parent
+# --- Re-export constants (backward compatibility) ---
+PACKAGE_ROOT = constants.PACKAGE_ROOT
+VALIDATION_PCNT = constants.VALIDATION_PCNT
+BATCH_SIZE = constants.BATCH_SIZE
+NUM_EPOCHS = constants.NUM_EPOCHS
+HIDDEN_DIM = constants.HIDDEN_DIM
+EMBEDDING_DIM = constants.EMBEDDING_DIM
+DROPOUT = constants.DROPOUT
+LEARNING_RATE = constants.LEARNING_RATE
+MARGIN = constants.MARGIN
+RAW_DATA_FOLDER = constants.RAW_DATA_FOLDER
+DATASET_DIR = constants.DATASET_DIR
+RETURNED_IMAGE_DIR = constants.RETURNED_IMAGE_DIR
+TRAINED_MODEL_DIR = constants.TRAINED_MODEL_DIR
+HEIGHT = constants.HEIGHT
+WIDTH = constants.WIDTH
+device = constants.DEVICE
 
-VALIDATION_PCNT = 0.1
 
-BATCH_SIZE = 64
-NUM_EPOCHS = 1
-HIDDEN_DIM = 256
-EMBEDDING_DIM = 128
-DROPOUT = 0.4
-LERANING_RATE = 0.0001
-MARGIN = 1.0
+def load_config(
+    config_path: str | pathlib.Path | None = None,
+    defaults: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Load YAML config and merge with defaults.
 
-RAW_DATA_FOLDER = PACKAGE_ROOT / "dataset/data/fashion"
-DATASET_DIR = PACKAGE_ROOT / "dataset"
-RETURNED_IMAGE_DIR = PACKAGE_ROOT / "images"
-TRAINED_MODEL_DIR = PACKAGE_ROOT / "models/trained_models"
-HEIGHT = 64
-WIDTH = 64
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    Args:
+        config_path: Path to YAML file. If None, returns defaults only.
+        defaults: Default values to merge. Config file overrides these.
+
+    Returns:
+        Merged config dict.
+    """
+    import yaml
+
+    result = dict(defaults or {})
+    if config_path is None:
+        return result
+    path = pathlib.Path(config_path)
+    if not path.exists():
+        return result
+    with open(path) as f:
+        loaded = yaml.safe_load(f) or {}
+    result.update(loaded)
+    return result
