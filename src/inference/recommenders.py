@@ -10,11 +10,11 @@ from pathlib import Path
 import pandas as pd
 
 from src.config import config as cfg
-from src.dataset.Dataloader import (
+from src.dataloader.data_loaders import (
     FashionCompleteTheLookDataloader,
     FashionProductSTLDataloader,
 )
-from src.utils.similarity import calculate_similarity
+from src.utils import calculate_similarity
 
 
 class SimilarProductRecommender:

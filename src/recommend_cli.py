@@ -4,10 +4,13 @@ Backward-compatible functions that delegate to SimilarProductRecommender
 and CompatibleProductRecommender.
 """
 
-from src.inference.recommender import (
+import random
+
+from src.inference.recommenders import (
     CompatibleProductRecommender,
     SimilarProductRecommender,
 )
+from src.utils import display_recommended_products
 
 
 def recommend_similar_products(
@@ -49,10 +52,6 @@ def recommend_complementary_products(
 
 
 if __name__ == "__main__":
-    import random
-
-    from src.utils.image_utils import display_recommended_products
-
     similar = recommend_similar_products(product_id=random.randint(1, 38000))
     print(similar)
     display_recommended_products(

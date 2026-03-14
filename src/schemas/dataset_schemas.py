@@ -1,12 +1,19 @@
+"""Dataset schemas: PyTorch Dataset classes defining data structure for each source."""
+
 import os
+import random
+from pathlib import Path
 
 import pandas as pd
 from PIL import Image
-from src.config import config as cfg
 from torch.utils.data import Dataset
+
+from src.config import config as cfg
 
 
 class FashionProductSTLDataset(Dataset):
+    """STL (Shop the Look) single-image dataset."""
+
     def __init__(self, image_dir, metadata_file, transform=None, subset=None):
         self.image_dir = image_dir
         self.metadata = (
@@ -35,6 +42,8 @@ class FashionProductSTLDataset(Dataset):
 
 
 class FashionProductCTLTripletDataset(Dataset):
+    """CTL (Complete the Look) triplet dataset: (anchor, pos, neg)."""
+
     def __init__(self, image_dir, metadata_file, data_type="train", transform=None):
         self.image_dir = image_dir
         self.data_type = data_type
@@ -45,12 +54,10 @@ class FashionProductCTLTripletDataset(Dataset):
         return len(self.metadata)
 
     def __getitem__(self, index):
-
         triplet_id = self.metadata.reset_index().iloc[index, 0]
         data_src_folder = (
             "train" if self.data_type in ["train", "validation"] else "test"
         )
-        # get the anchor, postive and negative image and save to img triplets
         img_triplets = []
         for img_type in ["anchor", "pos", "neg"]:
             img = Image.open(
@@ -74,6 +81,8 @@ class FashionProductCTLTripletDataset(Dataset):
 
 
 class FashionProductCTLSingleDataset(Dataset):
+    """CTL single-image dataset for embedding extraction."""
+
     def __init__(self, image_dir, metadata_file, data_type="train", transform=None):
         self.image_dir = image_dir
         self.data_type = data_type
@@ -88,12 +97,9 @@ class FashionProductCTLSingleDataset(Dataset):
         return len(self.metadata)
 
     def __getitem__(self, index):
-        # filter by image type in metadata
         self.metadata = self.metadata[self.metadata["image_type"] == self.data_type]
-        # get image id
         img_id = self.metadata.reset_index().iloc[index, 0]
 
-        # get and load cropped image
         try:
             img = Image.open(
                 os.path.join(
@@ -120,3 +126,86 @@ class FashionProductCTLSingleDataset(Dataset):
             img = self.transform(img)
 
         return img
+
+
+class PolyvoreTripletDataset(Dataset):
+    """Polyvore (anchor, pos, neg) triplets for outfit compatibility."""
+
+    def __init__(
+        self,
+        root: Path | str,
+        triplets_csv: Path | str | None = None,
+        split: str = "train",
+        transform=None,
+    ):
+        self.root = Path(root)
+        csv_path = Path(triplets_csv or self.root / "triplets.csv")
+        self.split = split
+        self.transform = transform
+
+        df = pd.read_csv(csv_path)
+        self.df = df[df["split"] == split].reset_index(drop=True)
+
+    def __len__(self) -> int:
+        return len(self.df)
+
+    def __getitem__(self, index: int):
+        row = self.df.iloc[index]
+        anchor_path = self.root / row["anchor_path"]
+        pos_path = self.root / row["pos_path"]
+        neg_path = self.root / row["neg_path"]
+
+        anchor = Image.open(anchor_path).convert("RGB")
+        pos = Image.open(pos_path).convert("RGB")
+        neg = Image.open(neg_path).convert("RGB")
+
+        if self.transform:
+            anchor = self.transform(anchor)
+            pos = self.transform(pos)
+            neg = self.transform(neg)
+
+        return anchor, pos, neg
+
+
+class Street2ShopTripletDataset(Dataset):
+    """Street2Shop (anchor_street, pos_shop, neg_shop) triplets for retrieval."""
+
+    def __init__(
+        self,
+        root: Path | str,
+        pairs_csv: Path | str | None = None,
+        split: str = "train",
+        transform=None,
+    ):
+        self.root = Path(root)
+        pairs_path = Path(pairs_csv or self.root / "pairs.csv")
+        self.split = split
+        self.transform = transform
+
+        df = pd.read_csv(pairs_path)
+        self.df = df[df["split"] == split].reset_index(drop=True)
+        self.shop_paths = self.df["shop_path"].unique().tolist()
+
+    def __len__(self) -> int:
+        return len(self.df)
+
+    def __getitem__(self, index: int):
+        row = self.df.iloc[index]
+        street_path = self.root / row["street_path"]
+        pos_shop_path = self.root / row["shop_path"]
+
+        neg_shop_path = random.choice(self.shop_paths)
+        while neg_shop_path == row["shop_path"]:
+            neg_shop_path = random.choice(self.shop_paths)
+        neg_shop_path = self.root / neg_shop_path
+
+        anchor = Image.open(street_path).convert("RGB")
+        pos = Image.open(pos_shop_path).convert("RGB")
+        neg = Image.open(neg_shop_path).convert("RGB")
+
+        if self.transform:
+            anchor = self.transform(anchor)
+            pos = self.transform(pos)
+            neg = self.transform(neg)
+
+        return anchor, pos, neg

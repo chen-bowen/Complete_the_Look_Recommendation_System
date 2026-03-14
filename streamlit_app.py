@@ -2,8 +2,8 @@
 
 import streamlit as st
 
-from src.inference.recommender import SimilarProductRecommender
-from src.utils.image_utils import display_recommended_products
+from src.inference.recommenders import SimilarProductRecommender
+from src.utils import display_recommended_products
 
 # Instantiate recommender once at startup
 recommender = SimilarProductRecommender(task_name="similar_product")

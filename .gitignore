@@ -3,9 +3,11 @@ src/dataset/data/fashion/
 src/dataset/data/STL-Dataset/
 src/dataset/data/complete-the-look-dataset/
 src/dataset/data/fashion_v2/
+src/dataset/data/street2shop/
+src/dataset/data/polyvore/
 __pycache__
 *.pickle
 .metals
 .vscode
 *.csv
-fashion_v2/
+src/dataset/data/*

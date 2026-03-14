@@ -13,3 +13,11 @@ validation_pcnt: 0.1
 
 # Paths (relative to project root or absolute)
 save_dir: "src/models/trained_models"
+
+# Street2Shop joint training (optional)
+use_street2shop: false
+street2shop_weight: 0.5
+street2shop_batch_size: 32
+
+# Polyvore merged into compatibility (optional)
+use_polyvore_in_compatibility: false

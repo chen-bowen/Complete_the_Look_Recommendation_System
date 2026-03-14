@@ -23,6 +23,8 @@
    "streamlit",
    "requests",
    "pre-commit>=4.5.1",
+   "gdown>=5.2.1",
+   "datasets>=2.14.0",
 ]
 
  [project.optional-dependencies]
@@ -41,4 +43,3 @@
 
  [tool.uv.sources]
  complete-the-look = { path = ".", editable = true }
-

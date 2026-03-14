@@ -1,8 +1,16 @@
-# Data download config for STL and CTL datasets.
-# Run download from src/dataset/data/ directory.
+# Data preparation config for STL, CTL, Street2Shop, and Polyvore.
+# Run: uv run python -m src.data_pipeline.data_preparation <stl_ctl|street2shop|polyvore>
 
 stl_categories: ["fashion"]
 stl_types: ["product"]
 ctl_category: "fashion_v2"
 ctl_types: ["train", "test"]
 max_workers: 5
+
+# Street2Shop
+street2shop_root: "src/dataset/data/street2shop"
+street2shop_pairs_csv: "pairs.csv"
+
+# Polyvore
+polyvore_root: "src/dataset/data/polyvore"
+polyvore_triplets_csv: "triplets.csv"

@@ -1,6 +1,6 @@
 """Inference: recommenders for similar and compatible products."""
 
-from src.inference.recommender import (
+from src.inference.recommenders import (
     CompatibleProductRecommender,
     SimilarProductRecommender,
     load_compatible_recommender,

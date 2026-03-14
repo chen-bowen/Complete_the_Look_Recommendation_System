@@ -20,22 +20,44 @@ Activate the virtual environment: `source .venv/bin/activate` (or use `uv run` w
 
 ## Datasets
 
-The dataset used is the [shop the look dataset](https://github.com/kang205/STL-Dataset) and the [complete the look dataset](https://github.com/eileenforwhat/complete-the-look-dataset) from Pinterest. Thank you for kindly sharing these great data sources to make this project possible.
+| Dataset | Purpose |
+|---------|---------|
+| [Complete the Look (CTL)](https://github.com/eileenforwhat/complete-the-look-dataset) | Outfit compatibility (anchor/pos/neg triplets). Downloaded as `fashion_v2`. |
+| [Shop the Look (STL)](https://github.com/kang205/STL-Dataset) | Similar product recommendations (alternative to CTL). |
+| [Street2Shop](docs/street2shop.md) | Street photo → shop product matching (multi-task). Fetched from Hugging Face. |
+| [Polyvore](docs/polyvore.md) | Additional outfit compatibility data, merged with CTL (multi-task). Use `--download-images` or add manually. |
+
+**STL/CTL setup**: Clone both repos into `src/dataset/data/`:
+- [STL-Dataset](https://github.com/kang205/STL-Dataset) for `fashion.json` (STL)
+- [complete-the-look-dataset](https://github.com/eileenforwhat/complete-the-look-dataset) for `raw_train.tsv` and `raw_test.tsv` (CTL)
+
+The preparation script fetches images from these metadata files.
 
 ## Quick Run Instructions
 
 #### Recommend Similar Products
-1. Download data: `uv run python -m src.dataset.data.download_data --ctl-test` (or `--stl` for STL)
-2. Get similar product embedding: `uv run python -m src.features.Embedding` (2+ hours without GPU)
-3. Recommend similar products: `uv run python -m src.recommend`
+1. Download data: `uv run python -m src.data_pipeline.data_preparation stl_ctl --ctl-test --data-dir src/dataset/data` (or `--stl` for STL)
+2. Get similar product embedding: `uv run python -m src.features.embeddings` (2+ hours without GPU)
+3. Recommend similar products: `uv run python -m src.recommend_cli`
 4. Streamlit UI: `uv run streamlit run streamlit_app.py`
 
 #### Recommend Compatible Products
-1. Download data: `uv run python -m src.dataset.data.download_data --ctl-train --ctl-test`
-2. Train compatible model: `uv run python -m src.models.training`
-3. Get compatible product embedding: `uv run python -m src.features.Embedding` (see `__main__` in Embedding.py)
-4. Evaluate: `uv run python -m src.models.evaluate`
-5. Recommend compatible products: `uv run python -m src.recommend` (select `recommend_complementary_products` in `__main__`)
+1. Download data: `uv run python -m src.data_pipeline.data_preparation stl_ctl --ctl-train --ctl-test --data-dir src/dataset/data`
+2. Train compatible model: `uv run python -m src.models.compatibility_trainer`
+3. Get compatible product embedding: `uv run python -m src.features.embeddings` (see `__main__` in embeddings.py)
+4. Evaluate: `uv run python -m src.models.evaluation`
+5. Recommend compatible products: `uv run python -m src.recommend_cli` (select `recommend_complementary_products` in `__main__`)
+
+#### Multi-task training (CTL + Street2Shop + Polyvore)
+
+Trains on three data sources: CTL provides the compatibility base; Street2Shop adds street-to-shop robustness; Polyvore augments compatibility triplets.
+
+1. Download CTL (fashion_v2): `uv run python -m src.data_pipeline.data_preparation stl_ctl --ctl-train --ctl-test --data-dir src/dataset/data`
+2. Download Street2Shop: `uv run python -m src.data_pipeline.data_preparation street2shop --out-dir src/dataset/data/street2shop`
+3. Prepare Polyvore: `uv run python -m src.data_pipeline.data_preparation polyvore --out-dir src/dataset/data/polyvore` (use `--download-images` to fetch images from Hugging Face, or add manually)
+4. Train: `uv run python -m src.models.compatibility_trainer --config configs/train_multitask.yaml`
+
+See [docs/street2shop.md](docs/street2shop.md) and [docs/polyvore.md](docs/polyvore.md) for details.
 
 ## Results
 Samples of similar product recommendation
@@ -48,6 +70,3 @@ Samples of compatible product recommendation
 (on the left is the query product, on the right is the top 5 recommended compatible products)
 
 <img width="750" alt="image" src="https://user-images.githubusercontent.com/18410378/146464340-db108af4-ae66-409b-97fc-cb993c7a17bb.png">
-
-
-

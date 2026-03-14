@@ -11,9 +11,9 @@ import pandas as pd
 import torch
 
 from src.config import config as cfg
-from src.features.Embedding import CompatibleProductEmbedder
-from src.dataset.Dataloader import FashionCompleteTheLookDataloader
-from src.utils.similarity import calculate_similarity
+from src.dataloader.data_loaders import FashionCompleteTheLookDataloader
+from src.features.embeddings import CompatibleProductEmbedder
+from src.utils import calculate_similarity
 
 
 class CompatibilityEvaluator:

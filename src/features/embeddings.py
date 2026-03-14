@@ -14,11 +14,11 @@ import tqdm
 from torchvision.models import ResNet18_Weights, resnet18
 
 from src.config import config as cfg
-from src.dataset.Dataloader import (
+from src.dataloader.data_loaders import (
     FashionCompleteTheLookDataloader,
     FashionProductSTLDataloader,
 )
-from src.models.Model import CompatibilityModel
+from src.models.compatibility_model import CompatibilityModel
 
 
 class SimilarProductEmbedder:
@@ -52,7 +52,7 @@ class SimilarProductEmbedder:
         resnet = resnet18(weights=ResNet18_Weights.IMAGENET1K_V1).to(self.device)
         resnet.fc = nn.Identity()
         resnet.eval()
-        transform = torchvision.transforms.Resize(256)
+        transform = torchvision.transforms.Resize((cfg.HEIGHT, cfg.WIDTH))
         all_features = []
 
         for batch in tqdm.tqdm(data_loader, desc=f"Extract {task_name}"):
@@ -113,7 +113,7 @@ class CompatibleProductEmbedder:
             device=self.device,
         )
         model.eval()
-        transform = torchvision.transforms.Resize(256)
+        transform = torchvision.transforms.Resize((cfg.HEIGHT, cfg.WIDTH))
         all_features = []
 
         for batch in tqdm.tqdm(data_loader, desc=f"Extract {task_name}"):

@@ -1,8 +1,10 @@
 """Compatibility model training with triplet loss.
 
 CompatibilityTrainer: Orchestrates training loop, validation, checkpointing.
+Supports joint multi-task training with Street2Shop for street-to-shop robustness.
 """
 
+import itertools
 import pathlib
 
 import numpy as np
@@ -10,12 +12,10 @@ import torch
 import torch.optim as optim
 from tqdm import tqdm
 
-from src.config import config as cfg
-from src.config.config import load_config
-from src.dataset.Dataloader import FashionCompleteTheLookDataloader
-from src.models.Model import CompatibilityModel
-from src.utils.image_utils import plot_learning_curves
-from src.utils.model_utils import init_weights
+from src.config import config as cfg, load_config
+from src.dataloader.data_loaders import FashionCompleteTheLookDataloader, Street2ShopDataloader
+from src.models.compatibility_model import CompatibilityModel
+from src.utils import init_weights, plot_learning_curves
 
 # Disable anomaly detection and profilers for speed
 torch.autograd.set_detect_anomaly(False)
@@ -37,17 +37,25 @@ class CompatibilityTrainer:
         margin: float = cfg.MARGIN,
         save_dir: pathlib.Path | str | None = None,
         device: torch.device | None = None,
+        use_street2shop: bool = False,
+        street2shop_weight: float = 0.5,
+        street2shop_batch_size: int = 32,
+        use_polyvore_in_compatibility: bool = False,
     ):
         """Initialize trainer.
 
         Args:
-            batch_size: Training batch size.
+            batch_size: Training batch size for CTL.
             num_epochs: Number of epochs to train.
             starting_epoch: Epoch to resume from (loads checkpoint if exists).
             learning_rate: Adam learning rate.
             margin: Triplet margin loss margin.
             save_dir: Directory for checkpoints. Default: cfg.TRAINED_MODEL_DIR.
             device: Device for training. Default: cfg.device.
+            use_street2shop: If True, jointly train on Street2Shop.
+            street2shop_weight: Loss weight for Street2Shop relative to CTL.
+            street2shop_batch_size: Batch size for Street2Shop.
+            use_polyvore_in_compatibility: If True, merge Polyvore triplets into CTL.
         """
         self.batch_size = batch_size
         self.num_epochs = num_epochs
@@ -56,18 +64,35 @@ class CompatibilityTrainer:
         self.margin = margin
         self.save_dir = pathlib.Path(save_dir or cfg.TRAINED_MODEL_DIR)
         self.device = device or cfg.device
+        self.use_street2shop = use_street2shop
+        self.street2shop_weight = street2shop_weight
+        self.street2shop_batch_size = street2shop_batch_size
+        self.use_polyvore_in_compatibility = use_polyvore_in_compatibility
         self.save_dir.mkdir(parents=True, exist_ok=True)
 
     def train(self) -> None:
         """Run full training loop: load data, train, validate, save checkpoints."""
         model = CompatibilityModel()
         train_loader = FashionCompleteTheLookDataloader(
-            batch_size=self.batch_size
+            batch_size=self.batch_size,
+            use_polyvore_in_compatibility=self.use_polyvore_in_compatibility,
         ).triplet_data_loader()
         val_loader = FashionCompleteTheLookDataloader(
             batch_size=max(self.batch_size // 9, 1),
             image_type="validation",
         ).triplet_data_loader()
+
+        s2s_train_loader = None
+        if self.use_street2shop:
+            try:
+                s2s_train_loader = Street2ShopDataloader(
+                    split="train",
+                    batch_size=self.street2shop_batch_size,
+                ).triplet_data_loader()
+            except Exception as e:
+                raise RuntimeError(
+                    f"Street2Shop enabled but dataloader failed: {e}. " "Run prepare street2shop to prepare pairs.csv."
+                ) from e
 
         # Freeze backbone; train only embedding head
         for name, param in model.named_parameters():
@@ -89,12 +114,25 @@ class CompatibilityTrainer:
         avg_validation_losses: list[float] = []
         loss = torch.tensor(0.0)
 
+        s2s_iter = itertools.cycle(iter(s2s_train_loader)) if s2s_train_loader is not None else None
+
         for e in tqdm(range(start_epoch, start_epoch + self.num_epochs), desc="Epochs"):
-            for i, (anchor, positive, negative) in enumerate(
-                tqdm(train_loader, desc="Training", leave=False)
-            ):
+            for i, (anchor, positive, negative) in enumerate(tqdm(train_loader, desc="Training", leave=False)):
                 optimizer.zero_grad(set_to_none=True)
-                loss = self._triplet_loss(anchor, positive, negative, criterion, model)
+                ctl_loss = self._triplet_loss(anchor, positive, negative, criterion, model)
+                loss = ctl_loss
+
+                if s2s_iter is not None:
+                    try:
+                        s2s_anchor, s2s_pos, s2s_neg = next(s2s_iter)
+                        s2s_loss = self._triplet_loss(s2s_anchor, s2s_pos, s2s_neg, criterion, model)
+                        loss = ctl_loss + self.street2shop_weight * s2s_loss
+                    except StopIteration:
+                        s2s_iter = itertools.cycle(iter(s2s_train_loader))
+                        s2s_anchor, s2s_pos, s2s_neg = next(s2s_iter)
+                        s2s_loss = self._triplet_loss(s2s_anchor, s2s_pos, s2s_neg, criterion, model)
+                        loss = ctl_loss + self.street2shop_weight * s2s_loss
+
                 loss.backward()
                 optimizer.step()
 
@@ -108,20 +146,19 @@ class CompatibilityTrainer:
                         validation_losses.append(val_loss)
                         avg_validation_losses.append(float(np.mean(validation_losses)))
                     model.train()
-                    print(
+                    log_msg = (
                         f"\nAvg Train Loss: {np.mean(training_losses):.4f}, "
                         f"Step Train: {training_losses[-1]:.4f}, "
                         f"Avg Val Loss: {np.mean(validation_losses):.4f}, "
                         f"Step Val: {validation_losses[-1]:.4f}\n"
                     )
+                    print(log_msg)
 
             self._save_checkpoint(model, optimizer, e, loss)
 
         plot_learning_curves(avg_training_losses, avg_validation_losses)
 
-    def _triplet_loss(
-        self, anchor, positive, negative, criterion, model
-    ) -> torch.Tensor:
+    def _triplet_loss(self, anchor, positive, negative, criterion, model) -> torch.Tensor:
         """Compute triplet margin loss for one batch."""
         anchor = anchor.to(self.device)
         positive = positive.to(self.device)
@@ -144,10 +181,7 @@ class CompatibilityTrainer:
 
     def _maybe_load_checkpoint(self, model, optimizer) -> int:
         """Load checkpoint if exists; return starting epoch."""
-        prev_path = (
-            self.save_dir
-            / f"trained_compatibility_model_epoch{self.starting_epoch - 1}.pth"
-        )
+        prev_path = self.save_dir / f"trained_compatibility_model_epoch{self.starting_epoch - 1}.pth"
         if prev_path.exists():
             ckpt = torch.load(prev_path)
             model.load_state_dict(ckpt.get("model_state_dict", ckpt))
@@ -156,9 +190,7 @@ class CompatibilityTrainer:
             return ckpt.get("epoch", self.starting_epoch) + 1
         return self.starting_epoch
 
-    def _save_checkpoint(
-        self, model, optimizer, epoch: int, loss: torch.Tensor
-    ) -> None:
+    def _save_checkpoint(self, model, optimizer, epoch: int, loss: torch.Tensor) -> None:
         """Save checkpoint to save_dir."""
         path = self.save_dir / f"trained_compatibility_model_epoch{epoch}.pth"
         torch.save(
@@ -193,6 +225,10 @@ def train_compatibility_model(
         "learning_rate": cfg.LEARNING_RATE,
         "margin": cfg.MARGIN,
         "save_dir": str(cfg.TRAINED_MODEL_DIR),
+        "use_street2shop": False,
+        "street2shop_weight": 0.5,
+        "street2shop_batch_size": 32,
+        "use_polyvore_in_compatibility": False,
     }
     config = load_config(config_path, defaults)
     trainer = CompatibilityTrainer(
@@ -202,6 +238,10 @@ def train_compatibility_model(
         learning_rate=config.get("learning_rate", cfg.LEARNING_RATE),
         margin=config.get("margin", cfg.MARGIN),
         save_dir=config.get("save_dir", cfg.TRAINED_MODEL_DIR),
+        use_street2shop=config.get("use_street2shop", False),
+        street2shop_weight=config.get("street2shop_weight", 0.5),
+        street2shop_batch_size=config.get("street2shop_batch_size", 32),
+        use_polyvore_in_compatibility=config.get("use_polyvore_in_compatibility", False),
     )
     trainer.train()
 

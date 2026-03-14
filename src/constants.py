@@ -13,6 +13,8 @@ import torch
 PACKAGE_ROOT = pathlib.Path(src.__file__).resolve().parent
 DATASET_DIR = PACKAGE_ROOT / "dataset"
 RAW_DATA_FOLDER = PACKAGE_ROOT / "dataset/data/fashion"
+STREET2SHOP_ROOT = DATASET_DIR / "data" / "street2shop"
+POLYVORE_ROOT = DATASET_DIR / "data" / "polyvore"
 TRAINED_MODEL_DIR = PACKAGE_ROOT / "models/trained_models"
 CACHED_EMBEDDINGS_DIR = PACKAGE_ROOT / "features/cached_embeddings"
 RETURNED_IMAGE_DIR = PACKAGE_ROOT / "images"
@@ -28,8 +30,8 @@ LEARNING_RATE = 0.0001
 MARGIN = 1.0
 
 # --- Image dimensions ---
-HEIGHT = 64
-WIDTH = 64
+HEIGHT = 224
+WIDTH = 224
 
 # --- Device ---
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")

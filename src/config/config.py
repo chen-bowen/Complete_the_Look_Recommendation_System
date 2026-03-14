@@ -4,10 +4,26 @@ Re-exports from src.constants for backward compatibility. Use load_config()
 to load YAML configs for training, inference, or data prep.
 """
 
+import logging
 import pathlib
+import sys
 from typing import Any
 
+import yaml
+
 from src import constants
+
+# --- Logging ---
+FORMATTER = logging.Formatter(
+    "%(asctime)s — %(name)s — %(levelname)s — %(funcName)s:%(lineno)d — %(message)s"
+)
+
+
+def get_console_handler():
+    """Return a console handler for logging."""
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(FORMATTER)
+    return handler
 
 # --- Re-export constants (backward compatibility) ---
 PACKAGE_ROOT = constants.PACKAGE_ROOT
@@ -21,6 +37,8 @@ LEARNING_RATE = constants.LEARNING_RATE
 MARGIN = constants.MARGIN
 RAW_DATA_FOLDER = constants.RAW_DATA_FOLDER
 DATASET_DIR = constants.DATASET_DIR
+STREET2SHOP_ROOT = constants.STREET2SHOP_ROOT
+POLYVORE_ROOT = constants.POLYVORE_ROOT
 RETURNED_IMAGE_DIR = constants.RETURNED_IMAGE_DIR
 TRAINED_MODEL_DIR = constants.TRAINED_MODEL_DIR
 HEIGHT = constants.HEIGHT
@@ -41,8 +59,6 @@ def load_config(
     Returns:
         Merged config dict.
     """
-    import yaml
-
     result = dict(defaults or {})
     if config_path is None:
         return result
