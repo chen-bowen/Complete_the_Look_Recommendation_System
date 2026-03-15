@@ -11,9 +11,12 @@ import pandas as pd
 import torch
 
 from src.config import config as cfg
+from src.config import get_simple_logger
 from src.dataloader.data_loaders import FashionCompleteTheLookDataloader
 from src.features.embeddings import CompatibleProductEmbedder
 from src.utils import calculate_similarity
+
+logger = get_simple_logger(__name__)
 
 
 class CompatibilityEvaluator:
@@ -135,4 +138,4 @@ def evaluation() -> float:
 
 if __name__ == "__main__":
     accuracy = evaluation()
-    print(f"The correct percentage of the compatibility test is {accuracy}")
+    logger.info(f"The correct percentage of the compatibility test is {accuracy}")

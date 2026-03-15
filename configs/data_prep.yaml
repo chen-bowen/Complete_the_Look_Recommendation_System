@@ -1,16 +1,30 @@
 # Data preparation config for STL, CTL, Street2Shop, and Polyvore.
-# Run: uv run python -m src.data_pipeline.data_preparation <stl_ctl|street2shop|polyvore>
+# Run: uv run python -m src.data_pipeline.data_preparation <stl_ctl|street2shop|polyvore> [--config configs/data_prep.yaml]
 
-stl_categories: ["fashion"]
-stl_types: ["product"]
-ctl_category: "fashion_v2"
-ctl_types: ["train", "test"]
-max_workers: 5
+# STL/CTL (Pinterest)
+stl_ctl:
+  data_dir: "src/dataset/data"
+  stl: true
+  ctl_train: true
+  ctl_test: true
+  max_workers: 5
 
-# Street2Shop
+# Street2Shop (Hugging Face)
+street2shop:
+  out_dir: "src/dataset/data/street2shop"
+  max_pairs: 124794
+  split: "train"
+  streaming: true
+
+# Polyvore (Hugging Face)
+polyvore:
+  out_dir: "src/dataset/data/polyvore"
+  max_triplets: 20000
+  download_images: false
+  streaming: true
+
+# Legacy keys (used by dataloaders)
 street2shop_root: "src/dataset/data/street2shop"
 street2shop_pairs_csv: "pairs.csv"
-
-# Polyvore
 polyvore_root: "src/dataset/data/polyvore"
 polyvore_triplets_csv: "triplets.csv"

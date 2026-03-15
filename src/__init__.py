@@ -1,3 +1,5 @@
+"""Complete the Look: fashion product recommendation (similar + compatible)."""
+
 import logging
 
 from src import features, utils

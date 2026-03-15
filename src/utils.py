@@ -13,8 +13,8 @@ from src.config import config as cfg
 
 
 # --- Model utils ---
-def init_weights(m):
-    """Apply Xavier initialization on linear layer weights."""
+def init_weights(m: nn.Module) -> None:
+    """Apply Xavier initialization on linear layer weights. Skips non-Linear layers."""
     if isinstance(m, nn.Linear):
         nn.init.xavier_normal_(m.weight)
 
@@ -42,15 +42,23 @@ def calculate_similarity(source_vector, destination_vector, sim_function):
 
 # --- Image utils ---
 def convert_to_url(signature: str, suffix: str = ".jpg") -> str:
-    """Build Pinterest CDN URL from image signature."""
+    """Build Pinterest CDN URL from image signature.
+
+    Args:
+        signature: Image ID (e.g. from STL/CTL metadata). Strips .jpg if present.
+        suffix: URL suffix (default .jpg).
+
+    Returns:
+        Full URL for the image.
+    """
     if isinstance(signature, str) and signature.endswith(".jpg"):
         signature = signature[:-4]
     prefix = "http://i.pinimg.com/400x/%s/%s/%s/%s"
     return prefix % (signature[0:2], signature[2:4], signature[4:6], signature) + suffix
 
 
-def plot_learning_curves(train_losses, validation_losses):
-    """Plot train and validation loss curves."""
+def plot_learning_curves(train_losses: list, validation_losses: list) -> None:
+    """Plot train and validation loss curves and save to PNG."""
     plt.figure(figsize=(10, 7))
     plt.plot(train_losses)
     plt.plot(validation_losses)
@@ -62,9 +70,23 @@ def plot_learning_curves(train_losses, validation_losses):
 
 
 def display_recommended_products(
-    im1, im2, im3, im4, im5, im6, simlarity_scores, save_image=True
+    im1: str,
+    im2: str,
+    im3: str,
+    im4: str,
+    im5: str,
+    im6: str,
+    simlarity_scores: list,
+    save_image: bool = True,
 ):
-    """Display recommended products in a grid."""
+    """Display query image (im1) and top 5 recommendations (im2–im6) in a grid.
+
+    Args:
+        im1: Path to query/selected product image.
+        im2–im6: Paths to recommended product images.
+        simlarity_scores: Similarity scores for each recommendation.
+        save_image: If True, save to RETURNED_IMAGE_DIR; else return fig.
+    """
     fig = plt.figure(figsize=(10, 7))
     rows, columns = 2, 5
     if save_image:
@@ -127,9 +149,22 @@ def display_recommended_products(
 
 
 def display_compatible_images(
-    im1, im2, im3, im4, im5, im6, product_id, save_image=True
+    im1: str,
+    im2: str,
+    im3: str,
+    im4: str,
+    im5: str,
+    im6: str,
+    product_id: str,
+    save_image: bool = True,
 ):
-    """Display compatible product images in a grid."""
+    """Display query image and 5 compatible products in a row.
+
+    Args:
+        im1–im6: Filenames under fashion_v2/train_single/.
+        product_id: Used for output filename.
+        save_image: If True, save to RETURNED_IMAGE_DIR; else return fig.
+    """
     fig = plt.figure(figsize=(10, 7))
     rows, columns = 1, 7
     base = f"{cfg.DATASET_DIR}/data/fashion_v2/train_single"

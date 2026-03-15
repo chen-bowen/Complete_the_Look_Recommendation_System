@@ -17,3 +17,8 @@ repos:
       - id: ruff
         args: [--fix]
         exclude: ^notebooks/ # Notebooks have different structure
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort

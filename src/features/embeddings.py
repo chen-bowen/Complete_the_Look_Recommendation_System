@@ -14,12 +14,12 @@ import tqdm
 from torchvision.models import ResNet18_Weights, resnet18
 
 from src.config import config as cfg
-from src.dataloader.data_loaders import (
-    FashionCompleteTheLookDataloader,
-    FashionProductSTLDataloader,
-)
+from src.config import get_simple_logger
+from src.dataloader.data_loaders import (FashionCompleteTheLookDataloader,
+                                         FashionProductSTLDataloader)
 from src.models.compatibility_model import CompatibilityModel
 
+logger = get_simple_logger(__name__)
 
 class SimilarProductEmbedder:
     """Extract ResNet-18 features for similar-product (same-category) retrieval."""
@@ -48,7 +48,7 @@ class SimilarProductEmbedder:
         Returns:
             Tensor of shape (N, 512) with features on CPU.
         """
-        print(f"You are using device: {self.device}")
+        logger.info(f"You are using device: {self.device}")
         resnet = resnet18(weights=ResNet18_Weights.IMAGENET1K_V1).to(self.device)
         resnet.fc = nn.Identity()
         resnet.eval()
@@ -107,7 +107,7 @@ class CompatibleProductEmbedder:
         Returns:
             Tensor of shape (N, embedding_dim) with features on CPU.
         """
-        print(f"You are using device: {self.device}")
+        logger.info(f"You are using device: {self.device}")
         model = CompatibilityModel.from_pretrained(
             self.model_path or cfg.TRAINED_MODEL_DIR,
             device=self.device,

@@ -10,10 +10,8 @@ from pathlib import Path
 import pandas as pd
 
 from src.config import config as cfg
-from src.dataloader.data_loaders import (
-    FashionCompleteTheLookDataloader,
-    FashionProductSTLDataloader,
-)
+from src.dataloader.data_loaders import (FashionCompleteTheLookDataloader,
+                                         FashionProductSTLDataloader)
 from src.utils import calculate_similarity
 
 

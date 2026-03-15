@@ -24,8 +24,8 @@ Activate the virtual environment: `source .venv/bin/activate` (or use `uv run` w
 |---------|---------|
 | [Complete the Look (CTL)](https://github.com/eileenforwhat/complete-the-look-dataset) | Outfit compatibility (anchor/pos/neg triplets). Downloaded as `fashion_v2`. |
 | [Shop the Look (STL)](https://github.com/kang205/STL-Dataset) | Similar product recommendations (alternative to CTL). |
-| [Street2Shop](docs/street2shop.md) | Street photo → shop product matching (multi-task). Fetched from Hugging Face. |
-| [Polyvore](docs/polyvore.md) | Additional outfit compatibility data, merged with CTL (multi-task). Use `--download-images` or add manually. |
+| [Street2Shop](docs/street2shop.md) | Street photo → shop product matching (multi-task). Streamed from Hugging Face (no full local cache). |
+| [Polyvore](docs/polyvore.md) | Additional outfit compatibility data, merged with CTL (multi-task). Streamed by default; use `--download-images` or add manually. |
 
 **STL/CTL setup**: Clone both repos into `src/dataset/data/`:
 - [STL-Dataset](https://github.com/kang205/STL-Dataset) for `fashion.json` (STL)
@@ -36,13 +36,13 @@ The preparation script fetches images from these metadata files.
 ## Quick Run Instructions
 
 #### Recommend Similar Products
-1. Download data: `uv run python -m src.data_pipeline.data_preparation stl_ctl --ctl-test --data-dir src/dataset/data` (or `--stl` for STL)
+1. Download data: `uv run python -m src.data_pipeline.data_preparation stl_ctl` (edit `configs/data_prep.yaml` for stl/ctl_train/ctl_test)
 2. Get similar product embedding: `uv run python -m src.features.embeddings` (2+ hours without GPU)
 3. Recommend similar products: `uv run python -m src.recommend_cli`
 4. Streamlit UI: `uv run streamlit run streamlit_app.py`
 
 #### Recommend Compatible Products
-1. Download data: `uv run python -m src.data_pipeline.data_preparation stl_ctl --ctl-train --ctl-test --data-dir src/dataset/data`
+1. Download data: `uv run python -m src.data_pipeline.data_preparation stl_ctl` (set `ctl_train: true` and `ctl_test: true` in `configs/data_prep.yaml`)
 2. Train compatible model: `uv run python -m src.models.compatibility_trainer`
 3. Get compatible product embedding: `uv run python -m src.features.embeddings` (see `__main__` in embeddings.py)
 4. Evaluate: `uv run python -m src.models.evaluation`
@@ -52,10 +52,11 @@ The preparation script fetches images from these metadata files.
 
 Trains on three data sources: CTL provides the compatibility base; Street2Shop adds street-to-shop robustness; Polyvore augments compatibility triplets.
 
-1. Download CTL (fashion_v2): `uv run python -m src.data_pipeline.data_preparation stl_ctl --ctl-train --ctl-test --data-dir src/dataset/data`
-2. Download Street2Shop: `uv run python -m src.data_pipeline.data_preparation street2shop --out-dir src/dataset/data/street2shop`
-3. Prepare Polyvore: `uv run python -m src.data_pipeline.data_preparation polyvore --out-dir src/dataset/data/polyvore` (use `--download-images` to fetch images from Hugging Face, or add manually)
-4. Train: `uv run python -m src.models.compatibility_trainer --config configs/train_multitask.yaml`
+1. Edit `configs/data_prep.yaml` for paths and options
+2. Download CTL: `uv run python -m src.data_pipeline.data_preparation stl_ctl` (set `ctl_train: true`, `ctl_test: true`)
+3. Download Street2Shop: `uv run python -m src.data_pipeline.data_preparation street2shop`
+4. Prepare Polyvore: `uv run python -m src.data_pipeline.data_preparation polyvore` (set `download_images: true` for images)
+5. Train: `uv run python -m src.models.compatibility_trainer --config configs/train_multitask.yaml`
 
 See [docs/street2shop.md](docs/street2shop.md) and [docs/polyvore.md](docs/polyvore.md) for details.
 

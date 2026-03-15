@@ -1,3 +1,9 @@
+"""Data loaders for STL, CTL, Street2Shop, and Polyvore.
+
+Builds metadata CSVs, samples triplets, and provides PyTorch DataLoaders
+with standard transforms (resize, normalize).
+"""
+
 import json
 import os
 import random
@@ -10,26 +16,25 @@ from torch.utils.data import ConcatDataset, DataLoader
 from torchvision import transforms
 
 from src.config import config as cfg
-from src.schemas.dataset_schemas import (
-    FashionProductCTLSingleDataset,
-    FashionProductCTLTripletDataset,
-    FashionProductSTLDataset,
-    PolyvoreTripletDataset,
-    Street2ShopTripletDataset,
-)
+from src.config import get_simple_logger
+from src.schemas.dataset_schemas import (FashionProductCTLSingleDataset,
+                                         FashionProductCTLTripletDataset,
+                                         FashionProductSTLDataset,
+                                         PolyvoreTripletDataset,
+                                         Street2ShopTripletDataset)
 from src.utils import convert_to_url
 
+logger = get_simple_logger(__name__)
 
 class FashionProductSTLDataloader:
-    def __init__(self):
+    """Dataloader for STL (Shop the Look) single-image dataset."""
+
+    def __init__(self) -> None:
+        """Build metadata CSV if needed, then ready for data_loader()."""
         self.build_metadata_csv()
 
-    def build_metadata_csv(self):
-        """
-        Creates the metadata csv file that could be used for image data generator,
-        metadata includes the following fields
-        "product_id", "image_path", "product_type", "image_url", "image_type"
-        """
+    def build_metadata_csv(self) -> None:
+        """Create dataset_metadata_stl.csv with product_id, image_path, product_type, image_url, image_type."""
         # if the file exists, skip
         if os.path.exists(f"{cfg.DATASET_DIR}/metadata/dataset_metadata_stl.csv"):
             return
@@ -70,8 +75,8 @@ class FashionProductSTLDataloader:
         # save to csv
         images_df.to_csv(f"{cfg.DATASET_DIR}/metadata/dataset_metadata_stl.csv", index=False)
 
-    def data_loader(self):
-        """Dataloader for FashionProductSTLDataset"""
+    def data_loader(self) -> DataLoader:
+        """Return DataLoader for FashionProductSTLDataset (product subset)."""
         # define transformations
         transformations = transforms.Compose(
             [
@@ -97,6 +102,8 @@ SKIP_IF_POS_SAME_CATEGORY_AS_ANCHOR = True  # whether or not anchor and pos/neg 
 
 
 class FashionCompleteTheLookDataloader:
+    """Dataloader for CTL (Complete the Look) triplets and single images."""
+
     def __init__(
         self,
         image_type="train",
@@ -113,18 +120,16 @@ class FashionCompleteTheLookDataloader:
         self.build_metadata_csv()
 
     @property
-    def img_file_map(self):
+    def img_file_map(self) -> dict:
+        """Map image_type to raw TSV path (train/test)."""
         return {
             "train": f"{cfg.DATASET_DIR}/data/complete-the-look-dataset/datasets/raw_train.tsv",
             "test": f"{cfg.DATASET_DIR}/data/complete-the-look-dataset/datasets/raw_test.tsv",
         }
 
     @staticmethod
-    def sample_triplets(data_by_sig, data_by_cat):
-        """
-        Sample triplets where <anchor, pos> are from the same outfit but different categories
-        and <pos, neg> are from the same category but different outfits.
-        """
+    def sample_triplets(data_by_sig: dict, data_by_cat: dict) -> pd.DataFrame:
+        """Sample triplets: anchor/pos same outfit different category; neg same category different outfit."""
         triplets = []
         cnt = 0
 
@@ -178,21 +183,18 @@ class FashionCompleteTheLookDataloader:
                     # print info
                     cnt += 1
                     if cnt % 100000 == 0:
-                        print("num_triplets={}".format(cnt))
-                        print("current_row={}".format(list(triplets)[-1]))
+                        logger.info("num_triplets={}".format(cnt))
+                        logger.info("current_row={}".format(list(triplets)[-1]))
 
-        print("Done! Total number triplets : {}".format(cnt))
+        logger.info("Done! Total number triplets : {}".format(cnt))
 
         # convert to dataframe
         triplets = pd.DataFrame(triplets).drop_duplicates()
 
         return triplets
 
-    def build_metadata_csv(self):
-        """
-        Creates the triplets metadata csv file that could be used for training data generator，
-        metadata includes a triplet of anchor, postive and negative image
-        """
+    def build_metadata_csv(self) -> None:
+        """Create dataset_metadata_ctl_triplets.csv and dataset_metadata_ctl_single.csv if missing."""
         # if the file exists, skip
         if os.path.exists(f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_triplets.csv") and os.path.exists(
             f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_single.csv"
@@ -279,8 +281,8 @@ class FashionCompleteTheLookDataloader:
                 ]
             ].drop_duplicates().to_csv(f"{cfg.DATASET_DIR}/metadata/dataset_metadata_ctl_single.csv", index=False)
 
-    def triplet_data_loader(self):
-        """Dataloader for FashionProductCTLTripletDataset (optionally merged with Polyvore)."""
+    def triplet_data_loader(self) -> DataLoader:
+        """DataLoader for (anchor, pos, neg) triplets. Optionally merged with Polyvore if enabled."""
         transformations = transforms.Compose(
             [
                 transforms.Resize((cfg.HEIGHT, cfg.WIDTH)),
@@ -320,8 +322,8 @@ class FashionCompleteTheLookDataloader:
             pin_memory=True,
         )
 
-    def single_data_loader(self):
-        """Dataloader for FashionProductCTLSingleDataset"""
+    def single_data_loader(self) -> DataLoader:
+        """DataLoader for single CTL images (embedding extraction)."""
         # define transformations
         transformations = transforms.Compose(
             [
@@ -357,7 +359,8 @@ class Street2ShopDataloader:
         split: str = "train",
         batch_size: int = 32,
         num_workers: int = 4,
-    ):
+    ) -> None:
+        """Initialize with root (path to street2shop/), split, batch_size, num_workers."""
         self.root = Path(root or str(cfg.DATASET_DIR / "data" / "street2shop"))
         self.split = split
         self.batch_size = batch_size

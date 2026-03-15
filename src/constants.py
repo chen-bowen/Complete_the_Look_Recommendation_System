@@ -6,10 +6,11 @@ to the package root.
 
 import pathlib
 
-import src
 import torch
 
-# --- Paths ---
+import src
+
+# --- Paths (relative to package root) ---
 PACKAGE_ROOT = pathlib.Path(src.__file__).resolve().parent
 DATASET_DIR = PACKAGE_ROOT / "dataset"
 RAW_DATA_FOLDER = PACKAGE_ROOT / "dataset/data/fashion"
@@ -19,7 +20,7 @@ TRAINED_MODEL_DIR = PACKAGE_ROOT / "models/trained_models"
 CACHED_EMBEDDINGS_DIR = PACKAGE_ROOT / "features/cached_embeddings"
 RETURNED_IMAGE_DIR = PACKAGE_ROOT / "images"
 
-# --- Training hyperparameters ---
+# --- Training hyperparameters (defaults; overridden by configs/train.yaml) ---
 VALIDATION_PCNT = 0.1
 BATCH_SIZE = 64
 NUM_EPOCHS = 1
@@ -29,9 +30,9 @@ DROPOUT = 0.4
 LEARNING_RATE = 0.0001
 MARGIN = 1.0
 
-# --- Image dimensions ---
+# --- Image dimensions (ResNet input size) ---
 HEIGHT = 224
 WIDTH = 224
 
-# --- Device ---
+# --- Device (CUDA if available, else CPU) ---
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")

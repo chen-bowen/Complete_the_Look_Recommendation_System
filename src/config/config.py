@@ -17,13 +17,27 @@ from src import constants
 FORMATTER = logging.Formatter(
     "%(asctime)s — %(name)s — %(levelname)s — %(funcName)s:%(lineno)d — %(message)s"
 )
+# Message only (no level, timestamp, or name)
+SIMPLE_FORMATTER = logging.Formatter("%(message)s")
 
 
-def get_console_handler():
-    """Return a console handler for logging."""
+def get_console_handler() -> logging.StreamHandler:
+    """Return a console handler for logging with standard format."""
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(FORMATTER)
     return handler
+
+
+def get_simple_logger(name: str) -> logging.Logger:
+    """Return a logger that outputs only the message (no INFO/level prefix)."""
+    log = logging.getLogger(name)
+    if not log.handlers:
+        h = logging.StreamHandler(sys.stdout)
+        h.setFormatter(SIMPLE_FORMATTER)
+        log.addHandler(h)
+        log.setLevel(logging.INFO)
+        log.propagate = False
+    return log
 
 # --- Re-export constants (backward compatibility) ---
 PACKAGE_ROOT = constants.PACKAGE_ROOT

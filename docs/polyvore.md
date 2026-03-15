@@ -5,14 +5,13 @@ Polyvore provides outfit compatibility data (compatible vs incompatible item pai
 ## Prepare
 
 ```bash
-# Metadata only (triplets.csv); add images manually
-uv run python -m src.data_pipeline.data_preparation polyvore --out-dir src/dataset/data/polyvore --max-triplets 10000
-
-# With images (~2.5GB, from Marqo/polyvore on Hugging Face)
-uv run python -m src.data_pipeline.data_preparation polyvore --download-images --out-dir src/dataset/data/polyvore
+uv run python -m src.data_pipeline.data_preparation polyvore
 ```
 
-Without `--download-images`, only `triplets.csv` is produced. Images can be added manually from [xthan/polyvore-dataset](https://github.com/xthan/polyvore-dataset), or use `--download-images` to fetch from Hugging Face.
+Options in `configs/data_prep.yaml` under `polyvore`:
+- `out_dir`, `max_triplets`, `download_images`, `streaming`
+
+Set `download_images: true` to fetch images from Marqo/polyvore (~2.5GB). Otherwise add images manually from [xthan/polyvore-dataset](https://github.com/xthan/polyvore-dataset).
 
 ## Merge into Compatibility
 

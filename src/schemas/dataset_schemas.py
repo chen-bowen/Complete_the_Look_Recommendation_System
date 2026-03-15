@@ -12,9 +12,16 @@ from src.config import config as cfg
 
 
 class FashionProductSTLDataset(Dataset):
-    """STL (Shop the Look) single-image dataset."""
+    """STL (Shop the Look) single-image dataset for similar-product retrieval."""
 
-    def __init__(self, image_dir, metadata_file, transform=None, subset=None):
+    def __init__(
+        self,
+        image_dir: str | Path,
+        metadata_file: str | Path,
+        transform=None,
+        subset: str | None = None,
+    ):
+        """Load STL metadata and optionally filter by image_type (e.g. 'product')."""
         self.image_dir = image_dir
         self.metadata = (
             pd.read_csv(metadata_file)
@@ -25,10 +32,11 @@ class FashionProductSTLDataset(Dataset):
         )
         self.transform = transform
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.metadata)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int):
+        """Return transformed image tensor for the given index."""
         img_row = self.metadata.iloc[index]
         image_path = img_row["image_path"]
         img = Image.open(os.path.join(cfg.PACKAGE_ROOT, "dataset", image_path)).convert(
@@ -42,9 +50,16 @@ class FashionProductSTLDataset(Dataset):
 
 
 class FashionProductCTLTripletDataset(Dataset):
-    """CTL (Complete the Look) triplet dataset: (anchor, pos, neg)."""
+    """CTL (Complete the Look) triplet dataset: (anchor, pos, neg) for compatibility training."""
 
-    def __init__(self, image_dir, metadata_file, data_type="train", transform=None):
+    def __init__(
+        self,
+        image_dir: str | Path,
+        metadata_file: str | Path,
+        data_type: str = "train",
+        transform=None,
+    ):
+        """Load CTL triplet metadata. data_type: train, validation, or test."""
         self.image_dir = image_dir
         self.data_type = data_type
         self.transform = transform
@@ -81,15 +96,23 @@ class FashionProductCTLTripletDataset(Dataset):
 
 
 class FashionProductCTLSingleDataset(Dataset):
-    """CTL single-image dataset for embedding extraction."""
+    """CTL single-image dataset for embedding extraction (one product per sample)."""
 
-    def __init__(self, image_dir, metadata_file, data_type="train", transform=None):
+    def __init__(
+        self,
+        image_dir: str | Path,
+        metadata_file: str | Path,
+        data_type: str = "train",
+        transform=None,
+    ):
+        """Load CTL single-image metadata. data_type: train, validation, or test."""
         self.image_dir = image_dir
         self.data_type = data_type
         self.transform = transform
         self.create_metadata(metadata_file)
 
-    def create_metadata(self, metadata_file):
+    def create_metadata(self, metadata_file: str | Path) -> None:
+        """Load metadata CSV and filter by data_type."""
         metadata = pd.read_csv(metadata_file)
         self.metadata = metadata[metadata["image_type"] == self.data_type]
 
@@ -138,6 +161,7 @@ class PolyvoreTripletDataset(Dataset):
         split: str = "train",
         transform=None,
     ):
+        """Load Polyvore triplets from CSV. Expects anchor_path, pos_path, neg_path, split columns."""
         self.root = Path(root)
         csv_path = Path(triplets_csv or self.root / "triplets.csv")
         self.split = split
@@ -177,6 +201,7 @@ class Street2ShopTripletDataset(Dataset):
         split: str = "train",
         transform=None,
     ):
+        """Load Street2Shop pairs. Builds triplets: (street, pos_shop, random_neg_shop)."""
         self.root = Path(root)
         pairs_path = Path(pairs_csv or self.root / "pairs.csv")
         self.split = split

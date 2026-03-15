@@ -5,11 +5,11 @@ Street2Shop provides street photo to shop product matching for real-world robust
 ## Download
 
 ```bash
-uv run python -m src.data_pipeline.data_preparation street2shop --out-dir src/dataset/data/street2shop --max-pairs 5000
+uv run python -m src.data_pipeline.data_preparation street2shop
 ```
 
-- `--max-pairs`: Limit pairs per split (default 5000 for quick setup)
-- `--split`: train or test
+Options in `configs/data_prep.yaml` under `street2shop`:
+- `out_dir`, `max_pairs`, `split`, `streaming`
 
 Output: `street2shop/street/`, `street2shop/shop/`, `street2shop/pairs.csv`
 

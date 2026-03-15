@@ -6,11 +6,12 @@ and CompatibleProductRecommender.
 
 import random
 
-from src.inference.recommenders import (
-    CompatibleProductRecommender,
-    SimilarProductRecommender,
-)
+from src.config import get_simple_logger
+from src.inference.recommenders import (CompatibleProductRecommender,
+                                        SimilarProductRecommender)
 from src.utils import display_recommended_products
+
+logger = get_simple_logger(__name__)
 
 
 def recommend_similar_products(
@@ -53,7 +54,7 @@ def recommend_complementary_products(
 
 if __name__ == "__main__":
     similar = recommend_similar_products(product_id=random.randint(1, 38000))
-    print(similar)
+    logger.info(similar)
     display_recommended_products(
         similar["input_product"]["image_path"],
         *[rec["image_path"] for rec in similar["recommended_products"]],
@@ -61,7 +62,7 @@ if __name__ == "__main__":
     )
 
     compatible = recommend_complementary_products(product_id=random.randint(1, 454000))
-    print(compatible)
+    logger.info(compatible)
     display_recommended_products(
         compatible["input_product"]["image_path"],
         *[rec["image_path"] for rec in compatible["recommended_compatible_products"]],

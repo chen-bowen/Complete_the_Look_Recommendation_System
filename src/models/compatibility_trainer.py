@@ -12,10 +12,14 @@ import torch
 import torch.optim as optim
 from tqdm import tqdm
 
-from src.config import config as cfg, load_config
-from src.dataloader.data_loaders import FashionCompleteTheLookDataloader, Street2ShopDataloader
+from src.config import config as cfg
+from src.config import get_simple_logger, load_config
+from src.dataloader.data_loaders import (FashionCompleteTheLookDataloader,
+                                         Street2ShopDataloader)
 from src.models.compatibility_model import CompatibilityModel
 from src.utils import init_weights, plot_learning_curves
+
+logger = get_simple_logger(__name__)
 
 # Disable anomaly detection and profilers for speed
 torch.autograd.set_detect_anomaly(False)
@@ -152,7 +156,7 @@ class CompatibilityTrainer:
                         f"Avg Val Loss: {np.mean(validation_losses):.4f}, "
                         f"Step Val: {validation_losses[-1]:.4f}\n"
                     )
-                    print(log_msg)
+                    logger.info(log_msg)
 
             self._save_checkpoint(model, optimizer, e, loss)
 
